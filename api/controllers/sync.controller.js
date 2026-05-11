@@ -60,6 +60,28 @@ class SyncController {
     }
   }
 
+  async getHistory(req, res, next) {
+    try {
+      const page = parseInt(req.query.page) || 1;
+      const { rows, count } = await syncService.getSyncHistory(page);
+      res.json({ status: 'success', data: rows, total: count });
+    } catch (err) { next(err); }
+  }
+
+  async stopJob(req, res, next) {
+    try {
+      const success = await syncService.stopJob(req.params.id);
+      res.json({ status: success ? 'success' : 'fail' });
+    } catch (err) { next(err); }
+  }
+
+  async deleteJob(req, res, next) {
+    try {
+      const success = await syncService.deleteJob(req.params.id);
+      res.json({ status: success ? 'success' : 'fail' });
+    } catch (err) { next(err); }
+  }
+
   async getFilterOptions(req, res, next) {
     try {
       const options = await jiraIssueRepository.getFilterOptions();

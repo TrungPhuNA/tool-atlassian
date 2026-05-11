@@ -39,7 +39,15 @@ class SyncService {
       const syncedKeys = new Set();
 
       for (let i = 0; i < boards.length; i++) {
+        // Kiểm tra xem job có bị yêu cầu dừng không
+        const currentJob = await SyncJob.findByPk(jobId);
+        if (currentJob.status === 'stopped') {
+          console.log(`[SyncService] Job ${jobId} was manually stopped.`);
+          return;
+        }
+
         const board = boards[i];
+// ... (giữ nguyên phần còn lại của loop)
         console.log(`[SyncService] Job ${jobId}: Syncing Board ${i + 1}/${boards.length}: ${board.name}`);
         
         let startAt = 0;
@@ -130,6 +138,33 @@ class SyncService {
     }
 
     return { issue, isNew: created };
+  }
+
+  async stopJob(jobId) {
+    const job = await SyncJob.findByPk(jobId);
+    if (job && job.status === 'running') {
+      await job.update({ status: 'stopped', completed_at: new Date() });
+      return true;
+    }
+    return false;
+  }
+
+  async deleteJob(jobId) {
+    const job = await SyncJob.findByPk(jobId);
+    if (job) {
+      await job.destroy();
+      return true;
+    }
+    return false;
+  }
+
+  async getSyncHistory(page = 1, limit = 20) {
+    const offset = (page - 1) * limit;
+    return SyncJob.findAndCountAll({
+      order: [['created_at', 'DESC']],
+      limit,
+      offset
+    });
   }
 
   async getLatestJob() {

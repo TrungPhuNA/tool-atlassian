@@ -15,7 +15,10 @@ router.post('/test-connection', jiraConfigController.testConnection);
 
 // Sync Jobs
 router.post('/sync', syncController.triggerSync);
+router.get('/sync/history', syncController.getHistory);
 router.get('/sync-status', syncController.getJobStatus);
+router.post('/sync/:id/stop', syncController.stopJob);
+router.delete('/sync/:id', syncController.deleteJob);
 router.post('/debug-sync', syncController.debugSync);
 
 module.exports = router;

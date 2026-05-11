@@ -74,6 +74,7 @@ class JiraService {
         params: { 
           startAt, 
           maxResults,
+          jql: 'created >= "2026-01-01"',
           fields: '*all'
         },
         headers: this.getAuthHeader(email, token)

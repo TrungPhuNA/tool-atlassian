@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   SyncJob.init({
     status: {
-      type: DataTypes.ENUM('pending', 'running', 'completed', 'failed'),
+      type: DataTypes.ENUM('pending', 'running', 'completed', 'failed', 'stopped'),
       defaultValue: 'pending'
     },
     total_boards: {
