@@ -32,21 +32,21 @@ const TaskRow = memo(({ task, onSelect }) => {
       onClick={() => onSelect(task)}
       className="group hover:bg-slate-50 transition-all cursor-pointer border-b border-slate-50"
     >
-      <td className="px-6 py-4 whitespace-nowrap">
+      <td className="px-6 py-4 whitespace-nowrap cursor-pointer">
         <div className="flex items-center gap-2">
           <span className={`px-2 py-0.5 rounded text-[10px] font-bold border uppercase ${TYPE_COLORS[task.issue_type] || 'bg-slate-100'}`}>
             {task.issue_type}
           </span>
           <div 
             onClick={(e) => handleCopy(e, task.issue_key)}
-            className="flex items-center gap-1 text-xs font-mono font-bold text-slate-400 hover:text-blue-600 transition-colors"
+            className="flex items-center gap-1 text-xs font-mono font-bold text-slate-400 hover:text-blue-600 transition-colors cursor-copy"
           >
             {task.issue_key}
             {copied ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3 opacity-0 group-hover:opacity-100" />}
           </div>
         </div>
       </td>
-      <td className="px-6 py-4">
+      <td className="px-6 py-4 cursor-pointer">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-1.5 flex-wrap">
             {!hasDesc && <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[9px] font-black rounded border border-amber-200 leading-none">THIẾU MÔ TẢ</span>}
@@ -61,10 +61,10 @@ const TaskRow = memo(({ task, onSelect }) => {
           )}
         </div>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-center text-xs font-bold text-slate-500 uppercase">
+      <td className="px-6 py-4 whitespace-nowrap text-center text-xs font-bold text-slate-500 uppercase cursor-pointer">
         {task.status}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
+      <td className="px-6 py-4 whitespace-nowrap cursor-pointer">
         <div className="flex items-center gap-2">
           {task.assignee_avatar ? (
             <img src={task.assignee_avatar} alt="" className="w-6 h-6 rounded-full border border-slate-200 shadow-sm" title={task.assignee_name} />
@@ -73,16 +73,16 @@ const TaskRow = memo(({ task, onSelect }) => {
           )}
         </div>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-center">
+      <td className="px-6 py-4 whitespace-nowrap text-center cursor-pointer">
         <span className={`text-xs font-bold ${hasSP ? 'text-blue-600' : 'text-slate-300'}`}>{task.story_points || '0'}</span>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-center text-xs font-medium text-slate-500">
+      <td className="px-6 py-4 whitespace-nowrap text-center text-xs font-medium text-slate-500 cursor-pointer">
         {task.due_date ? new Date(task.due_date).toLocaleDateString('vi-VN') : '-'}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-center text-xs font-medium text-slate-400">
+      <td className="px-6 py-4 whitespace-nowrap text-center text-xs font-medium text-slate-400 cursor-pointer">
         {task.start_date ? new Date(task.start_date).toLocaleDateString('vi-VN') : '-'}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-right">
+      <td className="px-6 py-4 whitespace-nowrap text-right cursor-pointer">
         {(!hasDesc || !hasSP || !hasDue) ? <AlertCircle className="w-4 h-4 text-orange-400" /> : <CheckCircle2 className="w-4 h-4 text-emerald-400 opacity-40" />}
       </td>
     </tr>
@@ -103,7 +103,7 @@ const TaskListView = () => {
     missing_due_date: false
   });
   const [showFilterModal, setShowFilterModal] = useState(false);
-  const [selectedTask, setSelectedTask] = useState(null);
+  const [selectedTaskId, setSelectedTaskId] = useState(null);
 
   const fetchFilterOptions = useCallback(async () => {
     try {
@@ -145,7 +145,8 @@ const TaskListView = () => {
   }, [fetchTasks]);
 
   const customSelectStyles = {
-    control: (base) => ({ ...base, borderRadius: '14px', border: '1px solid #f1f5f9', backgroundColor: '#f8fafc', padding: '4px', boxShadow: 'none' }),
+    control: (base) => ({ ...base, borderRadius: '14px', border: '1px solid #f1f5f9', backgroundColor: '#f8fafc', padding: '4px', boxShadow: 'none', cursor: 'pointer' }),
+    option: (base, state) => ({ ...base, cursor: 'pointer', backgroundColor: state.isFocused ? '#eff6ff' : 'white', color: state.isFocused ? '#2563eb' : '#475569' }),
     multiValue: (base) => ({ ...base, backgroundColor: '#e2e8f0', color: '#475569', borderRadius: '10px' }),
     multiValueLabel: (base) => ({ ...base, color: '#475569', fontWeight: 'bold', fontSize: '11px' }),
   };
@@ -171,7 +172,7 @@ const TaskListView = () => {
           </div>
           <button 
             onClick={() => setShowFilterModal(true)}
-            className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-2xl text-sm font-black shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all"
+            className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-2xl text-sm font-black shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all cursor-pointer"
           >
             <Filter className="w-4 h-4" /> Bộ lọc
             {(filters.statuses.length + filters.assigneeIds.length + filters.sprints.length + (filters.missing_description ? 1 : 0) + (filters.missing_story_points ? 1 : 0) + (filters.missing_due_date ? 1 : 0)) > 0 && (
@@ -200,7 +201,7 @@ const TaskListView = () => {
             </thead>
             <tbody className="divide-y divide-slate-50">
               {tasks.map((task) => (
-                <TaskRow key={task.id} task={task} onSelect={setSelectedTask} />
+                <TaskRow key={task.id} task={task} onSelect={(t) => setSelectedTaskId(t.issue_key)} />
               ))}
               {loading && (
                 <tr><td colSpan="8" className="px-6 py-24 text-center"><RefreshCw className="w-12 h-12 animate-spin mx-auto text-blue-100" /></td></tr>
@@ -220,7 +221,7 @@ const TaskListView = () => {
             >
               <div className="px-10 py-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <h3 className="text-2xl font-black text-slate-800 tracking-tight">Bộ lọc thông minh</h3>
-                <button onClick={() => setShowFilterModal(false)} className="p-3 hover:bg-white rounded-full border border-slate-100 transition-all shadow-sm"><X className="w-6 h-6 text-slate-400" /></button>
+                <button onClick={() => setShowFilterModal(false)} className="p-3 hover:bg-white rounded-full border border-slate-100 transition-all shadow-sm cursor-pointer"><X className="w-6 h-6 text-slate-400" /></button>
               </div>
               
               <div className="p-10 overflow-y-auto space-y-8">
@@ -257,7 +258,7 @@ const TaskListView = () => {
                     ].map(opt => (
                       <label key={opt.key} className={`flex flex-col items-center gap-3 p-5 rounded-[1.5rem] border transition-all cursor-pointer ${filters[opt.key] ? 'ring-2 ring-blue-500 bg-blue-50/50' : 'bg-white border-slate-100 hover:border-slate-300 shadow-sm'}`}>
                         <span className={`px-2 py-1 rounded text-[9px] font-black border ${opt.color}`}>{opt.label}</span>
-                        <input type="checkbox" className="w-5 h-5 rounded-lg border-slate-300 text-blue-600" checked={filters[opt.key]} onChange={e => setFilters({...filters, [opt.key]: e.target.checked})} />
+                        <input type="checkbox" className="w-5 h-5 rounded-lg border-slate-300 text-blue-600 cursor-pointer" checked={filters[opt.key]} onChange={e => setFilters({...filters, [opt.key]: e.target.checked})} />
                       </label>
                     ))}
                   </div>
@@ -265,15 +266,17 @@ const TaskListView = () => {
               </div>
 
               <div className="px-10 py-8 bg-slate-50/50 border-t border-slate-100 flex justify-end gap-4">
-                <button onClick={() => setFilters({ search: '', statuses: [], assigneeIds: [], sprints: [], missing_description: false, missing_story_points: false, missing_due_date: false })} className="px-6 py-3 text-sm font-bold text-slate-400 hover:text-slate-800 transition-colors">LÀM MỚI</button>
-                <button onClick={() => setShowFilterModal(false)} className="px-10 py-4 bg-blue-600 text-white rounded-[1.2rem] text-sm font-black shadow-2xl shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95">ÁP DỤNG</button>
+                <button onClick={() => setFilters({ search: '', statuses: [], assigneeIds: [], sprints: [], missing_description: false, missing_story_points: false, missing_due_date: false })} className="px-6 py-3 text-sm font-bold text-slate-400 hover:text-slate-800 transition-colors cursor-pointer">LÀM MỚI</button>
+                <button onClick={() => setShowFilterModal(false)} className="px-10 py-4 bg-blue-600 text-white rounded-[1.2rem] text-sm font-black shadow-2xl shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95 cursor-pointer">ÁP DỤNG</button>
               </div>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
 
-      {selectedTask && <TaskDetailModal task={selectedTask} onClose={() => setSelectedTask(null)} />}
+      <AnimatePresence>
+        {selectedTaskId && <TaskDetailModal taskId={selectedTaskId} onClose={() => setSelectedTaskId(null)} />}
+      </AnimatePresence>
     </div>
   );
 };

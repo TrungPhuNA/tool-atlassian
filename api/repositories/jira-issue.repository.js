@@ -69,8 +69,19 @@ class JiraIssueRepository {
     });
   }
 
-  async getById(id) {
-    return JiraIssue.findByPk(id, {
+  async getById(idOrKey) {
+    // Nếu là ID (số)
+    if (!isNaN(idOrKey)) {
+      return await JiraIssue.findByPk(idOrKey, {
+        include: [
+          { model: JiraIssue, as: 'subtasks' },
+          { model: JiraIssue, as: 'parent' }
+        ]
+      });
+    }
+    // Nếu là Key (chuỗi như DP-948)
+    return await JiraIssue.findOne({ 
+      where: { issue_key: idOrKey },
       include: [
         { model: JiraIssue, as: 'subtasks' },
         { model: JiraIssue, as: 'parent' }
