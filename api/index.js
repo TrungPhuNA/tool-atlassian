@@ -18,10 +18,10 @@ app.use(express.json());
 
 // Routes
 app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/jira', jiraRoutes);
+app.use('/api/v1/admin/jira', jiraRoutes); // Đã thêm /admin
 app.use('/api/v1/tasks', taskRoutes);
-app.use('/api/v1/sync', syncRoutes);
-app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/admin/sync', syncRoutes); // Đã thêm /admin
+app.use('/api/v1/admin/users', userRoutes); // Đã thêm /admin
 
 // Basic health check
 app.get('/health', (req, res) => {
