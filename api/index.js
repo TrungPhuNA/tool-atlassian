@@ -6,8 +6,8 @@ const db = require('./models');
 const authRoutes = require('./routes/auth.route');
 const jiraRoutes = require('./routes/jira.route');
 const taskRoutes = require('./routes/task.route');
-const syncRoutes = require('./routes/sync-history.route'); // Đã sửa
-const userRoutes = require('./routes/admin-user.route'); // Đã sửa
+const syncRoutes = require('./routes/sync-history.route');
+const userRoutes = require('./routes/admin-user.route');
 
 const app = express();
 const PORT = process.env.PORT || 5006;

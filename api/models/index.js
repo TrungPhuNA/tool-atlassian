@@ -12,7 +12,7 @@ const db = {};
 
 let sequelize;
 
-// BẮT BUỘC LẤY TỪ .ENV NẾU CÓ
+// Ưu tiên nạp từ .env với các tên biến bạn đã yêu cầu
 if (process.env.DB_NAME) {
   console.log('🔌 Khởi tạo Sequelize bằng biến môi trường (.env)');
   sequelize = new Sequelize(
@@ -24,17 +24,13 @@ if (process.env.DB_NAME) {
       port: process.env.DB_PORT || 3306,
       dialect: process.env.DB_DIALECT || 'mysql',
       logging: env === 'development' ? console.log : false,
-      // Chỉ lấy các cấu hình phụ từ config.json (như underscored, timestamps)
-      define: config.define || {
-        underscored: true,
-        timestamps: true,
-        createdAt: 'created_at',
-        updatedAt: 'updated_at'
+      define: {
+        ...config.define,
+        underscored: true
       }
     }
   );
 } else {
-  // Fallback duy nhất nếu không tìm thấy bất kỳ biến .env nào liên quan đến DB
   console.log('⚠️ Không tìm thấy biến môi trường DB, nạp từ config.json');
   sequelize = new Sequelize(config.database, config.username, config.password, config);
 }
