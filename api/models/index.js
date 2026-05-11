@@ -11,8 +11,9 @@ const db = {};
 
 let sequelize;
 
-// Ưu tiên nạp từ .env với các tên biến bạn đã yêu cầu
+// BẮT BUỘC LẤY TỪ .ENV NẾU CÓ
 if (process.env.DB_NAME) {
+  console.log('🔌 Khởi tạo Sequelize bằng biến môi trường (.env)');
   sequelize = new Sequelize(
     process.env.DB_NAME, 
     process.env.DB_USER, 
@@ -21,16 +22,19 @@ if (process.env.DB_NAME) {
       host: process.env.DB_HOST || '127.0.0.1',
       port: process.env.DB_PORT || 3306,
       dialect: process.env.DB_DIALECT || 'mysql',
-      ...config,
-      // Đảm bảo không bị ghi đè bởi các giá trị cũ trong config
-      define: {
-        ...config.define,
-        underscored: true
+      logging: env === 'development' ? console.log : false,
+      // Chỉ lấy các cấu hình phụ từ config.json (như underscored, timestamps)
+      define: config.define || {
+        underscored: true,
+        timestamps: true,
+        createdAt: 'created_at',
+        updatedAt: 'updated_at'
       }
     }
   );
 } else {
-  // Fallback về config.json nếu không có .env
+  // Fallback duy nhất nếu không tìm thấy bất kỳ biến .env nào liên quan đến DB
+  console.log('⚠️ Không tìm thấy biến môi trường DB, nạp từ config.json');
   sequelize = new Sequelize(config.database, config.username, config.password, config);
 }
 
