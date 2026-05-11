@@ -2,28 +2,30 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const db = require('./models');
+const authRoutes = require('./routes/auth.route');
+const jiraRoutes = require('./routes/jira.route');
+const taskRoutes = require('./routes/task.route');
+const syncRoutes = require('./routes/sync-history.route'); // Đã sửa
+const userRoutes = require('./routes/admin-user.route'); // Đã sửa
 
 const app = express();
+const PORT = process.env.PORT || 5006;
+
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-const PORT = process.env.PORT || 5005;
+// Routes
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/jira', jiraRoutes);
+app.use('/api/v1/tasks', taskRoutes);
+app.use('/api/v1/sync', syncRoutes);
+app.use('/api/v1/users', userRoutes);
 
-// Health Check
-app.get('/api/v1/health', (req, res) => {
-  res.json({ status: 'success', message: 'Jira Reporting Tool API is running' });
+// Basic health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date() });
 });
-
-// Auth Routes
-app.use('/api/v1/auth', require('./routes/auth.route'));
-
-// User Task Routes
-app.use('/api/v1/tasks', require('./routes/task.route'));
-
-// Admin Routes
-app.use('/api/v1/admin/jira', require('./routes/jira.route'));
-app.use('/api/v1/admin/users', require('./routes/admin-user.route'));
-app.use('/api/v1/admin/sync-history', require('./routes/sync-history.route'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -46,6 +48,7 @@ const startServer = async () => {
     });
   } catch (error) {
     console.error('❌ Unable to connect to the database:', error);
+    process.exit(1);
   }
 };
 

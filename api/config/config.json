@@ -20,6 +20,16 @@
     "dialect": "mysql"
   },
   "production": {
-    "use_env_variable": "DATABASE_URL"
+    "username": "DB_USERNAME",
+    "password": "DB_PASSWORD",
+    "database": "DB_NAME",
+    "host": "DB_HOST",
+    "dialect": "mysql",
+    "define": {
+      "underscored": true,
+      "timestamps": true,
+      "createdAt": "created_at",
+      "updatedAt": "updated_at"
+    }
   }
 }
