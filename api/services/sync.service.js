@@ -112,6 +112,9 @@ class SyncService {
       end_date: fields.duedate,
       sprint_name: fields.sprint?.name || fields.customfield_10020?.[0]?.name,
       story_points: fields.customfield_10016 || fields.customfield_10002 || fields.customfield_10106 || fields.customfield_10047,
+      has_description: !!fields.description,
+      has_story_points: !!(fields.customfield_10016 || fields.customfield_10002 || fields.customfield_10106 || fields.customfield_10047),
+      has_due_date: !!fields.duedate,
       jira_domain: jira_domain,
       jira_data: jiraIssue,
       last_sync_at: new Date()

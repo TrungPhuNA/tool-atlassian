@@ -34,6 +34,11 @@ class JiraIssueRepository {
       const cleanSprints = sprints.filter(Boolean);
       if (cleanSprints.length > 0) where.sprint_name = { [Op.in]: cleanSprints };
     }
+
+    // Bộ lọc chất lượng dữ liệu (Data Quality)
+    if (filters.missing_description === 'true') where.has_description = false;
+    if (filters.missing_story_points === 'true') where.has_story_points = false;
+    if (filters.missing_due_date === 'true') where.has_due_date = false;
     
     if (filters.search) {
       where[Op.or] = [

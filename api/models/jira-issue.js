@@ -93,9 +93,21 @@ module.exports = (sequelize, DataTypes) => {
       comment: 'Điểm Story Point'
     },
     due_date: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATEONLY,
       allowNull: true,
       comment: 'Hạn chót công việc'
+    },
+    has_description: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    has_story_points: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    has_due_date: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
     },
     jira_domain: {
       type: DataTypes.STRING,
