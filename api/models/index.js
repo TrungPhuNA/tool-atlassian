@@ -9,8 +9,14 @@ require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 const db = {};
 
-// KHỞI TẠO SEQUELIZE TRỰC TIẾP TỪ BIẾN MÔI TRƯỜNG
-console.log('🔌 Đang kết nối Database bằng biến môi trường (.env)...');
+// LOG CÁC BIẾN ĐỂ KIỂM TRA
+console.log('--- DATABASE CONFIG CHECK ---');
+console.log('DB_NAME:', process.env.DB_NAME);
+console.log('DB_USER:', process.env.DB_USER);
+console.log('DB_HOST:', process.env.DB_HOST);
+console.log('DB_PORT:', process.env.DB_PORT);
+console.log('DB_DIALECT:', process.env.DB_DIALECT);
+console.log('-----------------------------');
 
 const sequelize = new Sequelize(
   process.env.DB_NAME, 
@@ -30,7 +36,6 @@ const sequelize = new Sequelize(
   }
 );
 
-// Tự động load các models
 fs
   .readdirSync(__dirname)
   .filter(file => {
