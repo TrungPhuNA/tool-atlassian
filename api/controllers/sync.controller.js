@@ -26,10 +26,11 @@ class SyncController {
 
   async getIssues(req, res, next) {
     try {
-      const { rows, count } = await jiraIssueRepository.getAll(req.query);
+      const { rows, count, stats } = await jiraIssueRepository.getAll(req.query);
       res.json({ 
         status: 'success', 
         data: rows,
+        stats,
         pagination: {
           total: count,
           page: parseInt(req.query.page) || 1,

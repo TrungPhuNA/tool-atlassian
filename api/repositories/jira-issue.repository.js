@@ -52,7 +52,7 @@ class JiraIssueRepository {
     const limit = parseInt(filters.limit) || 30;
     const offset = (page - 1) * limit;
 
-    return JiraIssue.findAndCountAll({
+    const { rows, count } = await JiraIssue.findAndCountAll({
       where,
       limit,
       offset,
@@ -67,6 +67,24 @@ class JiraIssueRepository {
       ],
       distinct: true
     });
+
+    // Tính toán thống kê trên toàn bộ tập dữ liệu (đã áp dụng where)
+    const stats = {
+      total: count,
+      missingDescription: await JiraIssue.count({ where: { ...where, has_description: false } }),
+      missingStoryPoints: await JiraIssue.count({ where: { ...where, has_story_points: false } }),
+      missingDueDate: await JiraIssue.count({ where: { ...where, has_due_date: false } }),
+      standard: await JiraIssue.count({ 
+        where: { 
+          ...where, 
+          has_description: true, 
+          has_story_points: true, 
+          has_due_date: true 
+        } 
+      })
+    };
+
+    return { rows, count, stats };
   }
 
   async getById(idOrKey) {

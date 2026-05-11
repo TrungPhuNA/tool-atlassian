@@ -91,6 +91,7 @@ const TaskRow = memo(({ task, onSelect }) => {
 
 const TaskListView = () => {
   const [tasks, setTasks] = useState([]);
+  const [stats, setStats] = useState({ total: 0, standard: 0, missingDescription: 0, missingStoryPoints: 0, missingDueDate: 0 });
   const [loading, setLoading] = useState(true);
   const [filterOptions, setFilterOptions] = useState({ statuses: [], users: [], sprints: [] });
   const [filters, setFilters] = useState({
@@ -107,7 +108,7 @@ const TaskListView = () => {
 
   const fetchFilterOptions = useCallback(async () => {
     try {
-      const { data } = await client.get('/tasks/filters/options');
+      const { data } = await client.get('/admin/jira/filters/options');
       setFilterOptions({
         statuses: data.data.statuses.map(s => ({ value: s, label: s })),
         users: data.data.users.map(u => ({ value: u.id, label: u.name, avatar: u.avatar })),
@@ -131,6 +132,7 @@ const TaskListView = () => {
       };
       const { data } = await client.get('/tasks', { params });
       setTasks(data.data);
+      if (data.stats) setStats(data.stats);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
   }, [filters]);
@@ -182,6 +184,47 @@ const TaskListView = () => {
             )}
           </button>
         </div>
+      </div>
+
+      {/* Statistics Block */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        {[
+          { label: 'Tổng số Task', value: stats.total, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100', icon: LayoutList },
+          { 
+            label: 'Đạt tiêu chuẩn', 
+            value: stats.standard, 
+            color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100', icon: CheckCircle2 
+          },
+          { 
+            label: 'Thiếu mô tả', 
+            value: stats.missingDescription, 
+            color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100', icon: Info 
+          },
+          { 
+            label: 'Chưa chấm SP', 
+            value: stats.missingStoryPoints, 
+            color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100', icon: AlertCircle 
+          },
+          { 
+            label: 'Thiếu hạn', 
+            value: stats.missingDueDate, 
+            color: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-100', icon: Calendar 
+          },
+        ].map((stat, idx) => (
+          <motion.div 
+            key={idx}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.1 }}
+            className={`p-4 rounded-2xl border ${stat.bg} ${stat.border} shadow-sm flex flex-col gap-1`}
+          >
+            <div className="flex items-center justify-between">
+              <span className={`text-[10px] font-bold uppercase tracking-wider ${stat.color} opacity-80`}>{stat.label}</span>
+              <stat.icon className={`w-4 h-4 ${stat.color}`} />
+            </div>
+            <div className="text-2xl font-black text-slate-800">{stat.value}</div>
+          </motion.div>
+        ))}
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
