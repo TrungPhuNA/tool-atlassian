@@ -33,7 +33,7 @@ const TaskRow = memo(React.forwardRef(({ task, onSelect }, ref) => {
       onClick={() => onSelect(task)}
       className="group hover:bg-slate-50 transition-all cursor-pointer border-b border-slate-50"
     >
-      <td className="px-6 py-4 whitespace-nowrap cursor-pointer">
+      <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex items-center gap-2">
           <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${TYPE_COLORS[task.issue_type] || 'bg-slate-50'}`}>
             {task.issue_type}
@@ -47,7 +47,7 @@ const TaskRow = memo(React.forwardRef(({ task, onSelect }, ref) => {
           </div>
         </div>
       </td>
-      <td className="px-6 py-4 cursor-pointer">
+      <td className="px-6 py-4">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-1.5 flex-wrap">
             {!hasDesc && <span className="px-1.5 py-0.5 bg-amber-50 text-amber-600 text-[9px] font-bold rounded border border-amber-100 leading-none">Thiếu mô tả</span>}
@@ -62,10 +62,10 @@ const TaskRow = memo(React.forwardRef(({ task, onSelect }, ref) => {
           )}
         </div>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-center text-xs font-bold text-slate-500 cursor-pointer">
+      <td className="px-6 py-4 whitespace-nowrap text-center text-xs font-bold text-slate-500">
         {task.status}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap cursor-pointer">
+      <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex items-center gap-2">
           {task.assignee_avatar ? (
             <img src={task.assignee_avatar} alt="" className="w-6 h-6 rounded-full border border-slate-200 shadow-sm" title={task.assignee_name} />
@@ -74,19 +74,77 @@ const TaskRow = memo(React.forwardRef(({ task, onSelect }, ref) => {
           )}
         </div>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-center cursor-pointer">
+      <td className="px-6 py-4 whitespace-nowrap text-center">
         <span className={`text-xs font-bold ${hasSP ? 'text-blue-600' : 'text-slate-300'}`}>{task.story_points || '0'}</span>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-center text-xs font-medium text-slate-500 cursor-pointer">
+      <td className="px-6 py-4 whitespace-nowrap text-center text-xs font-medium text-slate-500">
         {task.due_date ? new Date(task.due_date).toLocaleDateString('vi-VN') : '-'}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-center text-xs font-medium text-slate-400 cursor-pointer">
+      <td className="px-6 py-4 whitespace-nowrap text-center text-xs font-medium text-slate-400">
         {task.start_date ? new Date(task.start_date).toLocaleDateString('vi-VN') : '-'}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-right cursor-pointer">
+      <td className="px-6 py-4 whitespace-nowrap text-right">
         {(!hasDesc || !hasSP || !hasDue) ? <AlertCircle className="w-4 h-4 text-orange-400 opacity-60" /> : <CheckCircle2 className="w-4 h-4 text-emerald-400 opacity-40" />}
       </td>
     </tr>
+  );
+}));
+
+const TaskCard = memo(React.forwardRef(({ task, onSelect }, ref) => {
+  const hasDesc = !!task.has_description;
+  const hasSP = !!(task.story_points && parseFloat(task.story_points) > 0);
+  const hasDue = !!task.due_date;
+
+  return (
+    <motion.div 
+      ref={ref}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      onClick={() => onSelect(task)}
+      className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-3 active:scale-[0.98] transition-all cursor-pointer"
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${TYPE_COLORS[task.issue_type] || 'bg-slate-50'}`}>
+            {task.issue_type}
+          </span>
+          <span className="text-xs font-mono font-bold text-slate-400">{task.issue_key}</span>
+        </div>
+        <span className="text-[10px] font-bold text-slate-500 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">
+          {task.status}
+        </span>
+      </div>
+
+      <div className="space-y-2">
+        <h3 className="text-sm font-bold text-slate-800 line-clamp-2 leading-snug">{task.summary}</h3>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {!hasDesc && <span className="px-1.5 py-0.5 bg-amber-50 text-amber-600 text-[9px] font-bold rounded border border-amber-100">Thiếu mô tả</span>}
+          {!hasSP && <span className="px-1.5 py-0.5 bg-orange-50 text-orange-600 text-[9px] font-bold rounded border border-orange-100">Chưa SP</span>}
+          {!hasDue && <span className="px-1.5 py-0.5 bg-rose-50 text-rose-600 text-[9px] font-bold rounded border border-rose-100">Thiếu hạn</span>}
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between pt-3 border-t border-slate-50">
+        <div className="flex items-center gap-2">
+          {task.assignee_avatar ? (
+            <img src={task.assignee_avatar} className="w-5 h-5 rounded-full shadow-sm" />
+          ) : (
+            <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center border border-slate-200"><User className="w-3 h-3 text-slate-400" /></div>
+          )}
+          <span className="text-[10px] font-bold text-slate-500 truncate max-w-[100px]">{task.assignee_name || 'Unassigned'}</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="flex flex-col items-end">
+            <span className="text-[8px] font-bold text-slate-400 uppercase leading-none mb-0.5">Pts</span>
+            <span className={`text-xs font-black ${hasSP ? 'text-blue-600' : 'text-slate-300'}`}>{task.story_points || 0}</span>
+          </div>
+          <div className="flex flex-col items-end border-l border-slate-100 pl-3">
+            <span className="text-[8px] font-bold text-slate-400 uppercase leading-none mb-0.5">Due</span>
+            <span className="text-xs font-bold text-slate-600">{task.due_date ? new Date(task.due_date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' }) : '-'}</span>
+          </div>
+        </div>
+      </div>
+    </motion.div>
   );
 }));
 
@@ -116,7 +174,7 @@ const TaskListView = () => {
     if (observer.current) observer.current.disconnect();
     observer.current = new IntersectionObserver(entries => {
       if (entries[0].isIntersecting && hasMore) {
-        setPage(prevPage => prevPage + 1);
+        setPage(prev => prev + 1);
       }
     });
     if (node) observer.current.observe(node);
@@ -161,7 +219,7 @@ const TaskListView = () => {
       if (data.stats) setStats(data.stats);
     } catch (err) { console.error(err); }
     finally { 
-      setLoading(false);
+      setLoading(false); 
       setLoadingMore(false);
     }
   }, [filters]);
@@ -170,195 +228,162 @@ const TaskListView = () => {
     fetchFilterOptions();
   }, [fetchFilterOptions]);
 
-  // Reset khi filter thay đổi
   useEffect(() => {
     setPage(1);
     const timer = setTimeout(() => fetchTasks(1, true), 400);
     return () => clearTimeout(timer);
   }, [filters, fetchTasks]);
 
-  // Tải thêm khi page tăng
   useEffect(() => {
-    if (page > 1) {
-      fetchTasks(page);
-    }
+    if (page > 1) fetchTasks(page);
   }, [page, fetchTasks]);
 
   const customSelectStyles = {
-    control: (base) => ({ ...base, borderRadius: '12px', border: '1px solid #f1f5f9', backgroundColor: '#f8fafc', padding: '2px', boxShadow: 'none', cursor: 'pointer' }),
-    option: (base, state) => ({ ...base, cursor: 'pointer', backgroundColor: state.isFocused ? '#eff6ff' : 'white', color: state.isFocused ? '#2563eb' : '#475569' }),
-    multiValue: (base) => ({ ...base, backgroundColor: '#e2e8f0', color: '#475569', borderRadius: '8px' }),
-    multiValueLabel: (base) => ({ ...base, color: '#475569', fontWeight: 'bold', fontSize: '11px' }),
+    control: (base) => ({ ...base, borderRadius: '12px', border: '1px solid #f1f5f9', backgroundColor: '#f8fafc', padding: '2px', boxShadow: 'none' }),
+    option: (base, state) => ({ ...base, cursor: 'pointer', backgroundColor: state.isFocused ? '#eff6ff' : 'white' }),
   };
 
   return (
-    <div className="max-w-[1600px] mx-auto p-6 space-y-6">
+    <div className="max-w-[1600px] mx-auto p-4 md:p-6 space-y-6">
+      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <h2 className="text-2xl font-bold text-slate-800 tracking-tight flex items-center gap-3">
             <LayoutList className="w-8 h-8 text-blue-600" /> Danh sách công việc
           </h2>
-          <p className="text-slate-400 text-sm mt-1 font-medium italic">Theo dõi hiệu suất và kiểm soát chất lượng dữ liệu Jira</p>
+          <p className="text-slate-400 text-sm mt-1 font-medium italic">Theo dõi chất lượng dữ liệu Jira</p>
         </div>
 
-        <div className="flex items-center gap-3 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm flex-1 max-w-2xl justify-end">
+        <div className="flex items-center gap-2 md:gap-3 bg-white p-1.5 md:p-2 rounded-xl md:rounded-2xl border border-slate-200 shadow-sm flex-1 max-w-2xl justify-end">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400" />
             <input 
-              type="text" placeholder="Tìm theo mã, tiêu đề, người làm..." 
-              className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 font-medium text-slate-700"
+              type="text" placeholder="Tìm kiếm..." 
+              className="w-full pl-9 md:pl-11 pr-3 md:pr-4 py-2 md:py-2.5 bg-slate-50 border-none rounded-lg md:rounded-xl text-xs md:text-sm outline-none"
               value={filters.search} onChange={(e) => setFilters({...filters, search: e.target.value})}
             />
           </div>
           <button 
             onClick={() => setShowFilterModal(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-100 hover:bg-blue-700 active:scale-95 transition-all cursor-pointer"
+            className="flex items-center gap-2 px-3 md:px-5 py-2 md:py-2.5 bg-blue-600 text-white rounded-lg md:rounded-xl text-xs md:text-sm font-bold shadow-lg shadow-blue-100 active:scale-95 transition-all"
           >
-            <Filter className="w-4 h-4" /> Bộ lọc
-            {(filters.statuses.length + filters.assigneeIds.length + filters.sprints.length + (filters.missing_description ? 1 : 0) + (filters.missing_story_points ? 1 : 0) + (filters.missing_due_date ? 1 : 0)) > 0 && (
-              <span className="px-1.5 py-0.5 bg-white text-blue-600 text-[10px] rounded-full font-bold">
-                {filters.statuses.length + filters.assigneeIds.length + filters.sprints.length + (filters.missing_description ? 1 : 0) + (filters.missing_story_points ? 1 : 0) + (filters.missing_due_date ? 1 : 0)}
-              </span>
-            )}
+            <Filter className="w-3.5 h-3.5 md:w-4 md:h-4" /> <span className="hidden md:inline">Bộ lọc</span>
           </button>
         </div>
       </div>
 
-      {/* Statistics Block */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
         {[
-          { label: 'Tổng số Task', value: stats.total, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100', icon: LayoutList },
-          { 
-            label: 'Đạt tiêu chuẩn', 
-            value: stats.standard, 
-            color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100', icon: CheckCircle2 
-          },
-          { 
-            label: 'Thiếu mô tả', 
-            value: stats.missingDescription, 
-            color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100', icon: Info 
-          },
-          { 
-            label: 'Chưa chấm SP', 
-            value: stats.missingStoryPoints, 
-            color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100', icon: AlertCircle 
-          },
-          { 
-            label: 'Thiếu hạn', 
-            value: stats.missingDueDate, 
-            color: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-100', icon: Calendar 
-          },
+          { label: 'Tổng số', value: stats.total, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100', icon: LayoutList },
+          { label: 'Đạt chuẩn', value: stats.standard, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100', icon: CheckCircle2 },
+          { label: 'Thiếu mô tả', value: stats.missingDescription, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100', icon: Info },
+          { label: 'Chưa SP', value: stats.missingStoryPoints, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100', icon: AlertCircle },
+          { label: 'Thiếu hạn', value: stats.missingDueDate, color: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-100', icon: Calendar },
         ].map((stat, idx) => (
-          <motion.div 
-            key={idx}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.1 }}
-            className={`p-4 rounded-2xl border ${stat.bg} ${stat.border} shadow-sm flex flex-col gap-1`}
-          >
-            <div className="flex items-center justify-between">
-              <span className={`text-[10px] font-bold uppercase tracking-wider ${stat.color} opacity-80`}>{stat.label}</span>
-              <stat.icon className={`w-4 h-4 ${stat.color}`} />
+          <div key={idx} className={`p-3 md:p-4 rounded-2xl border ${stat.bg} ${stat.border} shadow-sm`}>
+            <div className="flex items-center justify-between mb-1">
+              <span className={`text-[9px] md:text-[10px] font-bold uppercase ${stat.color}`}>{stat.label}</span>
+              <stat.icon className={`w-3 h-3 md:w-4 h-4 ${stat.color}`} />
             </div>
-            <div className="text-2xl font-black text-slate-800">{stat.value}</div>
-          </motion.div>
+            <div className="text-xl md:text-2xl font-black text-slate-800">{stat.value}</div>
+          </div>
         ))}
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      {/* View: Desktop Table */}
+      <div className="hidden md:block bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-100">
-                <th className="px-6 py-5 text-[11px] font-bold text-slate-400 whitespace-nowrap tracking-wider">Mã Task</th>
-                <th className="px-6 py-5 text-[11px] font-bold text-slate-400 whitespace-nowrap tracking-wider">Tiêu đề công việc</th>
-                <th className="px-6 py-5 text-[11px] font-bold text-slate-400 whitespace-nowrap tracking-wider text-center">Trạng thái</th>
-                <th className="px-6 py-5 text-[11px] font-bold text-slate-400 whitespace-nowrap tracking-wider">Người đảm nhận</th>
-                <th className="px-6 py-5 text-[11px] font-bold text-slate-400 whitespace-nowrap tracking-wider text-center">SP</th>
-                <th className="px-6 py-5 text-[11px] font-bold text-slate-400 whitespace-nowrap tracking-wider text-center">Deadline</th>
-                <th className="px-6 py-5 text-[11px] font-bold text-slate-400 whitespace-nowrap tracking-wider text-center">Ngày tạo</th>
-                <th className="px-6 py-5 text-[11px] font-bold text-slate-400 whitespace-nowrap tracking-wider text-right">Data</th>
+                <th className="px-6 py-5 text-[11px] font-bold text-slate-400 uppercase">Mã</th>
+                <th className="px-6 py-5 text-[11px] font-bold text-slate-400 uppercase">Tiêu đề</th>
+                <th className="px-6 py-5 text-[11px] font-bold text-slate-400 uppercase text-center">Status</th>
+                <th className="px-6 py-5 text-[11px] font-bold text-slate-400 uppercase text-center">User</th>
+                <th className="px-6 py-5 text-[11px] font-bold text-slate-400 uppercase text-center">SP</th>
+                <th className="px-6 py-5 text-[11px] font-bold text-slate-400 uppercase text-center">Due</th>
+                <th className="px-6 py-5 text-[11px] font-bold text-slate-400 uppercase text-center">Start</th>
+                <th className="px-6 py-5 text-[11px] font-bold text-slate-400 uppercase text-right">Data</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {tasks.map((task, index) => {
-                if (tasks.length === index + 1) {
-                  return <TaskRow ref={lastTaskElementRef} key={task.id} task={task} onSelect={(t) => setSelectedTaskId(t.issue_key)} />;
-                } else {
-                  return <TaskRow key={task.id} task={task} onSelect={(t) => setSelectedTaskId(t.issue_key)} />;
-                }
-              })}
-              {loading && (
-                <tr><td colSpan="8" className="px-6 py-20 text-center"><RefreshCw className="w-10 h-10 animate-spin mx-auto text-blue-100" /></td></tr>
-              )}
-              {loadingMore && (
-                <tr><td colSpan="8" className="px-6 py-4 text-center"><RefreshCw className="w-6 h-6 animate-spin mx-auto text-blue-400" /></td></tr>
-              )}
-              {!loading && !loadingMore && tasks.length === 0 && (
-                <tr><td colSpan="8" className="px-6 py-20 text-center text-slate-400 font-medium italic">Không tìm thấy công việc nào</td></tr>
-              )}
+              {tasks.map((task, index) => (
+                <TaskRow 
+                  key={task.id} 
+                  ref={index === tasks.length - 1 ? lastTaskElementRef : null} 
+                  task={task} 
+                  onSelect={(t) => setSelectedTaskId(t.issue_key)} 
+                />
+              ))}
             </tbody>
           </table>
+          {loading && <div className="py-20 text-center"><RefreshCw className="w-10 h-10 animate-spin mx-auto text-blue-100" /></div>}
         </div>
       </div>
 
+      {/* View: Mobile Cards */}
+      <div className="md:hidden space-y-4">
+        {tasks.map((task, index) => (
+          <TaskCard 
+            key={task.id} 
+            ref={index === tasks.length - 1 ? lastTaskElementRef : null} 
+            task={task} 
+            onSelect={(t) => setSelectedTaskId(t.issue_key)} 
+          />
+        ))}
+        {loading && <div className="py-20 text-center"><RefreshCw className="w-10 h-10 animate-spin mx-auto text-blue-100" /></div>}
+      </div>
+
+      {loadingMore && <div className="py-6 text-center"><RefreshCw className="w-6 h-6 animate-spin mx-auto text-blue-400" /></div>}
+
       <AnimatePresence>
         {showFilterModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md" onClick={() => setShowFilterModal(false)}>
+          <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4 bg-slate-900/60 backdrop-blur-md" onClick={() => setShowFilterModal(false)}>
             <motion.div 
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}
-              className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+              initial={{ opacity: 0, y: 100 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 100 }}
+              className="bg-white w-full max-w-xl rounded-t-3xl md:rounded-2xl shadow-2xl overflow-hidden"
               onClick={e => e.stopPropagation()}
             >
-              <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                <h3 className="text-xl font-bold text-slate-800">Bộ lọc thông minh</h3>
-                <button onClick={() => setShowFilterModal(false)} className="p-2 hover:bg-white rounded-full border border-slate-100 cursor-pointer"><X className="w-5 h-5 text-slate-400" /></button>
+              <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                <h3 className="font-bold text-slate-800">Bộ lọc thông minh</h3>
+                <X className="w-6 h-6 text-slate-400 cursor-pointer p-1" onClick={() => setShowFilterModal(false)} />
               </div>
-              
-              <div className="p-8 overflow-y-auto space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Trạng thái</label>
-                    <Select isMulti options={filterOptions.statuses} styles={customSelectStyles} placeholder="Chọn..." value={filters.statuses} onChange={v => setFilters({...filters, statuses: v})} />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Sprint</label>
-                    <Select isMulti options={filterOptions.sprints} styles={customSelectStyles} placeholder="Chọn..." value={filters.sprints} onChange={v => setFilters({...filters, sprints: v})} />
-                  </div>
+              <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Trạng thái</label>
+                  <Select isMulti options={filterOptions.statuses} styles={customSelectStyles} value={filters.statuses} onChange={v => setFilters({...filters, statuses: v})} placeholder="Chọn status..." />
                 </div>
-
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Người làm</label>
-                  <Select isMulti options={filterOptions.users} styles={customSelectStyles} placeholder="Chọn..." value={filters.assigneeIds} onChange={v => setFilters({...filters, assigneeIds: v})} 
-                    formatOptionLabel={opt => (
-                      <div className="flex items-center gap-2">
-                        {opt.avatar ? <img src={opt.avatar} className="w-5 h-5 rounded-full" /> : <div className="w-5 h-5 rounded-full bg-slate-100" />}
-                        <span className="text-xs font-semibold">{opt.label}</span>
-                      </div>
-                    )}
-                  />
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Sprint</label>
+                  <Select isMulti options={filterOptions.sprints} styles={customSelectStyles} value={filters.sprints} onChange={v => setFilters({...filters, sprints: v})} placeholder="Chọn sprint..." />
                 </div>
-
-                <div className="space-y-4 pt-4 border-t border-slate-100">
-                  <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Chất lượng dữ liệu</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Người đảm nhận</label>
+                  <Select isMulti options={filterOptions.users} styles={customSelectStyles} value={filters.assigneeIds} onChange={v => setFilters({...filters, assigneeIds: v})} placeholder="Chọn người..." />
+                </div>
+                <div className="pt-4 border-t border-slate-100">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic block mb-3">Chất lượng dữ liệu</span>
+                  <div className="grid grid-cols-3 gap-2">
                     {[
-                      { key: 'missing_description', label: 'Thiếu mô tả', color: 'bg-amber-50 text-amber-600 border-amber-100' },
-                      { key: 'missing_story_points', label: 'Thiếu SP', color: 'bg-orange-50 text-orange-600 border-orange-100' },
-                      { key: 'missing_due_date', label: 'Thiếu hạn', color: 'bg-rose-50 text-rose-600 border-rose-100' }
+                      { key: 'missing_description', label: 'Thiếu mô tả' },
+                      { key: 'missing_story_points', label: 'Thiếu SP' },
+                      { key: 'missing_due_date', label: 'Thiếu hạn' }
                     ].map(opt => (
-                      <label key={opt.key} className={`flex flex-col items-center gap-2 p-4 rounded-xl border transition-all cursor-pointer ${filters[opt.key] ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-100 hover:bg-slate-50'}`}>
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${opt.color}`}>{opt.label}</span>
-                        <input type="checkbox" className="hidden" checked={filters[opt.key]} onChange={e => setFilters({...filters, [opt.key]: e.target.checked})} />
-                      </label>
+                      <button 
+                        key={opt.key}
+                        onClick={() => setFilters({...filters, [opt.key]: !filters[opt.key]})}
+                        className={`px-2 py-2 rounded-xl text-[10px] font-bold border transition-all ${filters[opt.key] ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-white text-slate-500 border-slate-100'}`}
+                      >
+                        {opt.label}
+                      </button>
                     ))}
                   </div>
                 </div>
               </div>
-
-              <div className="px-8 py-6 bg-slate-50/50 border-t border-slate-100 flex justify-end gap-3">
-                <button onClick={() => setFilters({ search: '', statuses: [], assigneeIds: [], sprints: [], missing_description: false, missing_story_points: false, missing_due_date: false })} className="px-6 py-2 text-sm font-semibold text-slate-400 hover:text-slate-800 cursor-pointer">Làm mới</button>
-                <button onClick={() => setShowFilterModal(false)} className="px-8 py-2 bg-blue-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-100 cursor-pointer">Áp dụng</button>
+              <div className="px-6 py-6 bg-slate-50 flex justify-between gap-3">
+                <button onClick={() => setFilters({ search: '', statuses: [], assigneeIds: [], sprints: [], missing_description: false, missing_story_points: false, missing_due_date: false })} className="text-sm font-bold text-slate-400 hover:text-slate-600">Làm mới</button>
+                <button onClick={() => setShowFilterModal(false)} className="px-10 py-3 bg-blue-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-100 active:scale-95 transition-all">Áp dụng</button>
               </div>
             </motion.div>
           </div>

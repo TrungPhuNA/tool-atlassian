@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
-import { LayoutGrid, Server, LogOut, BarChart3, User as UserIcon, RefreshCw } from 'lucide-react';
+import { LayoutGrid, Server, LogOut, BarChart3, User as UserIcon, RefreshCw, Menu, X } from 'lucide-react';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -9,7 +9,7 @@ import AdminJiraConfig from './pages/admin/AdminJiraConfig';
 import AdminUserManagement from './pages/admin/AdminUserManagement';
 import AdminSyncManagement from './pages/admin/AdminSyncManagement';
 import Toast from './components/Toast';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 
 // Thành phần bảo vệ Route
 const ProtectedRoute = ({ children, user, requireAdmin = false }) => {
@@ -21,6 +21,7 @@ const ProtectedRoute = ({ children, user, requireAdmin = false }) => {
 
 // Layout chính cho ứng dụng sau khi đăng nhập
 const MainLayout = ({ children, user, onLogout }) => {
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const location = useLocation();
   const isAdmin = user?.role === 'admin';
 
@@ -29,47 +30,36 @@ const MainLayout = ({ children, user, onLogout }) => {
     window.location.href = '/';
   };
 
+  const navLinks = [
+    { to: '/tasks', label: 'Công việc', icon: LayoutGrid, adminOnly: false },
+    { to: '/admin/sync', label: 'Đồng bộ', icon: RefreshCw, adminOnly: true },
+    { to: '/admin/config', label: 'Cấu hình', icon: Server, adminOnly: true },
+    { to: '/admin/users', label: 'Thành viên', icon: UserIcon, adminOnly: true },
+  ];
+
   return (
     <div className="min-h-screen bg-[#f8fafc] flex flex-col font-sans">
       <nav className="bg-white border-b border-slate-100 sticky top-0 z-50 shadow-sm">
-        <div className="max-w-[1600px] mx-auto px-6 h-20 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 group cursor-pointer transition-all hover:opacity-90">
-            <div className="p-2.5 bg-blue-600 rounded-xl shadow-lg shadow-blue-100 group-hover:scale-105 transition-transform">
-              <BarChart3 className="w-6 h-6 text-white" />
+        <div className="max-w-[1600px] mx-auto px-4 md:px-6 h-16 md:h-20 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2 md:gap-3 group cursor-pointer transition-all hover:opacity-90">
+            <div className="p-2 bg-blue-600 rounded-lg md:rounded-xl shadow-lg shadow-blue-100 group-hover:scale-105 transition-transform">
+              <BarChart3 className="w-5 h-5 md:w-6 md:h-6 text-white" />
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-slate-900 italic">Jira Insight</h1>
+            <h1 className="text-lg md:text-xl font-bold tracking-tight text-slate-900 italic">Jira Insight</h1>
           </Link>
 
-          <div className="flex items-center gap-6">
+          {/* Desktop Menu */}
+          <div className="hidden md:flex items-center gap-6">
             <div className="flex bg-slate-100 p-1 rounded-xl">
-              <Link 
-                to="/tasks"
-                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${location.pathname === '/tasks' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-              >
-                <LayoutGrid className="w-4 h-4" /> Công việc
-              </Link>
-              {isAdmin && (
-                <>
-                  <Link 
-                    to="/admin/sync"
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${location.pathname === '/admin/sync' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-                  >
-                    <RefreshCw className="w-4 h-4" /> Đồng bộ
-                  </Link>
-                  <Link 
-                    to="/admin/config"
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${location.pathname === '/admin/config' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-                  >
-                    <Server className="w-4 h-4" /> Cấu hình
-                  </Link>
-                  <Link 
-                    to="/admin/users"
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${location.pathname === '/admin/users' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-                  >
-                    <UserIcon className="w-4 h-4" /> Thành viên
-                  </Link>
-                </>
-              )}
+              {navLinks.filter(link => !link.adminOnly || isAdmin).map((link) => (
+                <Link 
+                  key={link.to}
+                  to={link.to}
+                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${location.pathname === link.to ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                  <link.icon className="w-4 h-4" /> {link.label}
+                </Link>
+              ))}
             </div>
 
             <div className="h-8 w-px bg-slate-200" />
@@ -88,10 +78,57 @@ const MainLayout = ({ children, user, onLogout }) => {
               </button>
             </div>
           </div>
+
+          {/* Mobile Menu Button */}
+          <div className="flex md:hidden items-center gap-3">
+            <div className="flex flex-col items-end">
+              <span className="text-[10px] font-black text-slate-800">{user.full_name || user.username}</span>
+              <span className="text-[8px] font-black text-blue-500 uppercase tracking-widest leading-none">{user.role}</span>
+            </div>
+            <button 
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="p-2 text-slate-600 bg-slate-50 rounded-lg active:scale-95 transition-all"
+            >
+              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
+
+        {/* Mobile Dropdown Menu */}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="md:hidden bg-white border-t border-slate-50 overflow-hidden shadow-xl"
+            >
+              <div className="p-4 space-y-2">
+                {navLinks.filter(link => !link.adminOnly || isAdmin).map((link) => (
+                  <Link 
+                    key={link.to}
+                    to={link.to}
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`p-4 rounded-xl text-sm font-bold flex items-center gap-3 transition-all ${location.pathname === link.to ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                  >
+                    <link.icon className="w-5 h-5" /> {link.label}
+                  </Link>
+                ))}
+                <div className="pt-2 border-t border-slate-50">
+                  <button 
+                    onClick={handleLogout}
+                    className="w-full p-4 rounded-xl text-sm font-bold text-red-500 flex items-center gap-3 hover:bg-red-50 transition-all"
+                  >
+                    <LogOut className="w-5 h-5" /> Đăng xuất
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
 
-      <main className="flex-1 py-10">
+      <main className="flex-1 py-6 md:py-10">
         {children}
       </main>
 

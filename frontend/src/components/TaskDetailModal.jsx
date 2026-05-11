@@ -54,13 +54,13 @@ const TaskDetailModal = ({ taskId, onClose }) => {
   if (!taskId) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60" onClick={onClose}>
+    <div className="fixed inset-0 z-[60] flex items-end md:items-center justify-center p-0 md:p-4 bg-slate-900/60 backdrop-blur-sm" onClick={onClose}>
       <motion.div 
-        initial={{ opacity: 0, y: 10 }} 
+        initial={{ opacity: 0, y: 100 }} 
         animate={{ opacity: 1, y: 0 }} 
-        exit={{ opacity: 0, y: 10 }}
-        transition={{ duration: 0.2, ease: "easeOut" }}
-        className="bg-white w-full max-w-5xl max-h-[85vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-slate-100 will-change-transform" 
+        exit={{ opacity: 0, y: 100 }}
+        transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+        className="bg-white w-full max-w-5xl h-[92vh] md:h-auto md:max-h-[85vh] rounded-t-3xl md:rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-slate-100 will-change-transform" 
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
@@ -78,7 +78,7 @@ const TaskDetailModal = ({ taskId, onClose }) => {
           <button onClick={onClose} className="p-1.5 hover:bg-slate-50 rounded-lg text-slate-400 transition-all cursor-pointer"><X className="w-5 h-5" /></button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 lg:p-8">
+        <div className="flex-1 overflow-y-auto p-5 md:p-8">
           {loading ? (
             <div className="h-64 flex flex-col items-center justify-center gap-4">
               <Loader2 className="w-10 h-10 text-blue-500 animate-spin opacity-20" />
@@ -94,7 +94,7 @@ const TaskDetailModal = ({ taskId, onClose }) => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               <div className="lg:col-span-8 space-y-8">
                 <div>
-                  <h2 className="text-2xl font-bold text-slate-800 leading-snug">{task.summary}</h2>
+                  <h2 className="text-xl md:text-2xl font-bold text-slate-800 leading-snug">{task.summary}</h2>
                 </div>
 
                 <div className="space-y-4">
@@ -102,7 +102,7 @@ const TaskDetailModal = ({ taskId, onClose }) => {
                     <div className="h-4 w-1 bg-blue-600 rounded-full"></div>
                     <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Mô tả công việc</h3>
                   </div>
-                  <div className="text-slate-700 text-sm leading-relaxed bg-slate-50/50 p-6 rounded-xl border border-slate-100 min-h-[120px]">
+                  <div className="text-slate-700 text-sm leading-relaxed bg-slate-50/50 p-4 md:p-6 rounded-xl border border-slate-100 min-h-[120px]">
                     {renderDescription()}
                   </div>
                 </div>
