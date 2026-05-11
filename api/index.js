@@ -40,9 +40,11 @@ const startServer = async () => {
     await db.sequelize.authenticate();
     console.log('✅ Database connected successfully.');
     
-    // Tắt tự động cập nhật cấu trúc bảng để tránh lỗi ER_TOO_MANY_KEYS
-    // await db.sequelize.sync({ alter: true });
-    console.log('✅ Database synchronized.');
+    // Chỉ chạy Sync nếu được cấu hình trong .env (Dùng cho lần đầu deploy)
+    if (process.env.DB_SYNC === 'true') {
+      await db.sequelize.sync({ alter: true });
+      console.log('✅ Database synchronized.');
+    }
     
     app.listen(PORT, () => {
       console.log(`🚀 Server is running on http://localhost:${PORT}`);
