@@ -13,7 +13,7 @@ const TYPE_COLORS = {
   'Sub-task': 'bg-slate-50 text-slate-600 border-slate-100',
 };
 
-const TaskRow = memo(({ task, onSelect }) => {
+const TaskRow = memo(React.forwardRef(({ task, onSelect }, ref) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = (e, text) => {
@@ -29,6 +29,7 @@ const TaskRow = memo(({ task, onSelect }) => {
 
   return (
     <tr 
+      ref={ref}
       onClick={() => onSelect(task)}
       className="group hover:bg-slate-50 transition-all cursor-pointer border-b border-slate-50"
     >
@@ -87,12 +88,15 @@ const TaskRow = memo(({ task, onSelect }) => {
       </td>
     </tr>
   );
-});
+}));
 
 const TaskListView = () => {
   const [tasks, setTasks] = useState([]);
   const [stats, setStats] = useState({ total: 0, standard: 0, missingDescription: 0, missingStoryPoints: 0, missingDueDate: 0 });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const [filterOptions, setFilterOptions] = useState({ statuses: [], users: [], sprints: [] });
   const [filters, setFilters] = useState({
     search: '',
@@ -106,9 +110,21 @@ const TaskListView = () => {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
 
+  const observer = React.useRef();
+  const lastTaskElementRef = useCallback(node => {
+    if (loading || loadingMore) return;
+    if (observer.current) observer.current.disconnect();
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        setPage(prevPage => prevPage + 1);
+      }
+    });
+    if (node) observer.current.observe(node);
+  }, [loading, loadingMore, hasMore]);
+
   const fetchFilterOptions = useCallback(async () => {
     try {
-      const { data } = await client.get('/admin/jira/filters/options');
+      const { data } = await client.get('/tasks/filters/options');
       setFilterOptions({
         statuses: data.data.statuses.map(s => ({ value: s, label: s })),
         users: data.data.users.map(u => ({ value: u.id, label: u.name, avatar: u.avatar })),
@@ -117,11 +133,14 @@ const TaskListView = () => {
     } catch (err) { console.error('Lỗi lấy options:', err); }
   }, []);
 
-  const fetchTasks = useCallback(async (isReset = false) => {
-    if (isReset) setLoading(true);
+  const fetchTasks = useCallback(async (pageNum = 1, isInitial = false) => {
+    if (isInitial) setLoading(true);
+    else setLoadingMore(true);
+    
     try {
       const params = {
-        page: 1, limit: 100,
+        page: pageNum, 
+        limit: 50,
         search: filters.search?.trim() || undefined,
         status: filters.statuses.length > 0 ? filters.statuses.map(s => s.value).join(',') : undefined,
         assignee_id: filters.assigneeIds.length > 0 ? filters.assigneeIds.map(u => u.value).join(',') : undefined,
@@ -131,20 +150,39 @@ const TaskListView = () => {
         missing_due_date: filters.missing_due_date || undefined
       };
       const { data } = await client.get('/tasks', { params });
-      setTasks(data.data);
+      
+      if (pageNum === 1) {
+        setTasks(data.data);
+      } else {
+        setTasks(prev => [...prev, ...data.data]);
+      }
+      
+      setHasMore(data.data.length === 50);
       if (data.stats) setStats(data.stats);
     } catch (err) { console.error(err); }
-    finally { setLoading(false); }
+    finally { 
+      setLoading(false);
+      setLoadingMore(false);
+    }
   }, [filters]);
 
   useEffect(() => {
     fetchFilterOptions();
   }, [fetchFilterOptions]);
 
+  // Reset khi filter thay đổi
   useEffect(() => {
-    const timer = setTimeout(() => fetchTasks(true), 400);
+    setPage(1);
+    const timer = setTimeout(() => fetchTasks(1, true), 400);
     return () => clearTimeout(timer);
-  }, [fetchTasks]);
+  }, [filters, fetchTasks]);
+
+  // Tải thêm khi page tăng
+  useEffect(() => {
+    if (page > 1) {
+      fetchTasks(page);
+    }
+  }, [page, fetchTasks]);
 
   const customSelectStyles = {
     control: (base) => ({ ...base, borderRadius: '12px', border: '1px solid #f1f5f9', backgroundColor: '#f8fafc', padding: '2px', boxShadow: 'none', cursor: 'pointer' }),
@@ -243,11 +281,21 @@ const TaskListView = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {tasks.map((task) => (
-                <TaskRow key={task.id} task={task} onSelect={(t) => setSelectedTaskId(t.issue_key)} />
-              ))}
+              {tasks.map((task, index) => {
+                if (tasks.length === index + 1) {
+                  return <TaskRow ref={lastTaskElementRef} key={task.id} task={task} onSelect={(t) => setSelectedTaskId(t.issue_key)} />;
+                } else {
+                  return <TaskRow key={task.id} task={task} onSelect={(t) => setSelectedTaskId(t.issue_key)} />;
+                }
+              })}
               {loading && (
                 <tr><td colSpan="8" className="px-6 py-20 text-center"><RefreshCw className="w-10 h-10 animate-spin mx-auto text-blue-100" /></td></tr>
+              )}
+              {loadingMore && (
+                <tr><td colSpan="8" className="px-6 py-4 text-center"><RefreshCw className="w-6 h-6 animate-spin mx-auto text-blue-400" /></td></tr>
+              )}
+              {!loading && !loadingMore && tasks.length === 0 && (
+                <tr><td colSpan="8" className="px-6 py-20 text-center text-slate-400 font-medium italic">Không tìm thấy công việc nào</td></tr>
               )}
             </tbody>
           </table>
