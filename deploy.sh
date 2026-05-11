@@ -11,7 +11,7 @@ cd $PROJECT_ROOT
 
 # 1. Pull code mới nhất
 echo "📥 Đang tải code mới từ Git..."
-git pull origin master
+git pull origin master --no-rebase
 
 # 2. Cài đặt và Build Frontend
 echo "⚛️ Đang Build Frontend..."
