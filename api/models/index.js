@@ -2,39 +2,35 @@
 
 const fs = require('fs');
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '../.env') });
 const Sequelize = require('sequelize');
 const process = require('process');
 const basename = path.basename(__filename);
-const env = process.env.NODE_ENV || 'development';
-const config = require(__dirname + '/../config/config.json')[env];
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
+
 const db = {};
 
-let sequelize;
+// KHỞI TẠO SEQUELIZE TRỰC TIẾP TỪ BIẾN MÔI TRƯỜNG
+console.log('🔌 Đang kết nối Database bằng biến môi trường (.env)...');
 
-// Ưu tiên nạp từ .env với các tên biến bạn đã yêu cầu
-if (process.env.DB_NAME) {
-  console.log('🔌 Khởi tạo Sequelize bằng biến môi trường (.env)');
-  sequelize = new Sequelize(
-    process.env.DB_NAME, 
-    process.env.DB_USER, 
-    process.env.DB_PASS, 
-    {
-      host: process.env.DB_HOST || '127.0.0.1',
-      port: process.env.DB_PORT || 3306,
-      dialect: process.env.DB_DIALECT || 'mysql',
-      logging: env === 'development' ? console.log : false,
-      define: {
-        ...config.define,
-        underscored: true
-      }
+const sequelize = new Sequelize(
+  process.env.DB_NAME, 
+  process.env.DB_USER, 
+  process.env.DB_PASS, 
+  {
+    host: process.env.DB_HOST || '127.0.0.1',
+    port: process.env.DB_PORT || 3306,
+    dialect: process.env.DB_DIALECT || 'mysql',
+    logging: process.env.NODE_ENV === 'development' ? console.log : false,
+    define: {
+      underscored: true,
+      timestamps: true,
+      createdAt: 'created_at',
+      updatedAt: 'updated_at'
     }
-  );
-} else {
-  console.log('⚠️ Không tìm thấy biến môi trường DB, nạp từ config.json');
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
-}
+  }
+);
 
+// Tự động load các models
 fs
   .readdirSync(__dirname)
   .filter(file => {
