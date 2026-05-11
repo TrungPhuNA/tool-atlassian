@@ -54,12 +54,16 @@ const TaskDetailModal = ({ taskId, onClose }) => {
   if (!taskId) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60" onClick={onClose}>
       <motion.div 
-        initial={{ opacity: 0, scale: 0.98, y: 5 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.98, y: 5 }}
-        className="bg-white w-full max-w-5xl max-h-[85vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-slate-100" onClick={e => e.stopPropagation()}
+        initial={{ opacity: 0, y: 10 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        exit={{ opacity: 0, y: 10 }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
+        className="bg-white w-full max-w-5xl max-h-[85vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-slate-100 will-change-transform" 
+        onClick={e => e.stopPropagation()}
       >
-        {/* Header - Nhỏ gọn hơn */}
+        {/* Header */}
         <div className="px-6 py-3.5 border-b border-slate-100 flex items-center justify-between bg-white">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 px-2.5 py-1 bg-slate-50 rounded-lg border border-slate-100">
@@ -78,7 +82,7 @@ const TaskDetailModal = ({ taskId, onClose }) => {
           {loading ? (
             <div className="h-64 flex flex-col items-center justify-center gap-4">
               <Loader2 className="w-10 h-10 text-blue-500 animate-spin opacity-20" />
-              <p className="text-slate-400 text-xs font-semibold italic">Đang tải dữ liệu...</p>
+              <p className="text-slate-400 text-xs font-semibold italic text-center">Đang tải...</p>
             </div>
           ) : error ? (
             <div className="h-64 flex flex-col items-center justify-center gap-4 text-center p-6">
