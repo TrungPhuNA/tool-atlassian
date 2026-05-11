@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } f
 import { LayoutGrid, Server, LogOut, BarChart3, User as UserIcon, RefreshCw } from 'lucide-react';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import TaskListView from './pages/tasks/TaskListView';
 import AdminJiraConfig from './pages/admin/AdminJiraConfig';
 import AdminUserManagement from './pages/admin/AdminUserManagement';
@@ -32,12 +33,12 @@ const MainLayout = ({ children, user, onLogout }) => {
     <div className="min-h-screen bg-[#f8fafc] flex flex-col font-sans">
       <nav className="bg-white border-b border-slate-100 sticky top-0 z-50 shadow-sm">
         <div className="max-w-[1600px] mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-blue-600 rounded-xl shadow-lg shadow-blue-100">
+          <Link to="/" className="flex items-center gap-3 group cursor-pointer transition-all hover:opacity-90">
+            <div className="p-2.5 bg-blue-600 rounded-xl shadow-lg shadow-blue-100 group-hover:scale-105 transition-transform">
               <BarChart3 className="w-6 h-6 text-white" />
             </div>
-            <h1 className="text-xl font-black tracking-tight text-slate-900 uppercase italic">Jira Insight</h1>
-          </div>
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 italic">Jira Insight</h1>
+          </Link>
 
           <div className="flex items-center gap-6">
             <div className="flex bg-slate-100 p-1 rounded-xl">
@@ -127,6 +128,7 @@ function App() {
         {/* Public Routes */}
         <Route path="/" element={<LandingPage user={user} />} />
         <Route path="/login" element={<LoginPage onLoginSuccess={loginSuccess} showToast={showToast} />} />
+        <Route path="/register" element={<RegisterPage showToast={showToast} />} />
 
         {/* User Routes */}
         <Route path="/tasks" element={
