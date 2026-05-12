@@ -4,7 +4,7 @@ const jiraIssueRepository = require('../repositories/jira-issue.repository');
 class ExportController {
     async exportToGoogleSheet(req, res, next) {
         try {
-            const { columns, filters, title, userEmail } = req.body;
+            const { columns, filters, title, userEmail, spreadsheetId } = req.body;
 
             // 1. Lấy dữ liệu tasks dựa trên filter
             // Tăng limit để lấy toàn bộ dữ liệu cần xuất (ví dụ tối đa 5000 dòng)
@@ -27,6 +27,10 @@ class ExportController {
             const dataRows = rows.map(task => {
                 return columns.map(col => {
                     let val = task[col.id];
+                    if (col.id === 'issue_key') {
+                        const jiraLink = `https://${task.jira_domain}/browse/${val}`;
+                        return `=HYPERLINK("${jiraLink}", "${val}")`;
+                    }
                     if (col.id.includes('date') && val) {
                         return new Date(val).toLocaleDateString('vi-VN');
                     }
@@ -39,11 +43,16 @@ class ExportController {
 
             // 3. Gọi service để tạo và đẩy dữ liệu
             const sheetTitle = title || `Jira Export ${new Date().toLocaleDateString('vi-VN')}`;
+            
+            // Nếu không có ID từ frontend, lấy từ env
+            const finalSpreadsheetId = spreadsheetId || process.env.GOOGLE_SHEET_ID;
+
             const result = await googleSheetService.createAndExport(
                 sheetTitle,
                 headers,
                 dataRows,
-                userEmail
+                userEmail,
+                finalSpreadsheetId
             );
 
             res.json({

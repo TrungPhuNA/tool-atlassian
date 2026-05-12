@@ -4,9 +4,11 @@ const fs = require('fs');
 
 class GoogleSheetService {
     constructor() {
-        const keyPath = path.join(__dirname, '../gg-sheet.json');
         this.auth = new google.auth.GoogleAuth({
-            keyFile: keyPath,
+            credentials: {
+                client_email: process.env.GOOGLE_CLIENT_EMAIL,
+                private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+            },
             scopes: [
                 'https://www.googleapis.com/auth/spreadsheets',
                 'https://www.googleapis.com/auth/drive'
@@ -20,38 +22,79 @@ class GoogleSheetService {
      * @param {Array} headers Mảng các tiêu đề cột ['Mã', 'Tiêu đề', ...]
      * @param {Array} rows Mảng các dòng dữ liệu [[val1, val2], ...]
      * @param {string} userEmail Email của người dùng để share quyền (optional)
+     * @param {string} existingSpreadsheetId ID của spreadsheet có sẵn (optional)
      */
-    async createAndExport(title, headers, rows, userEmail = null) {
+    async createAndExport(title, headers, rows, userEmail = null, existingSpreadsheetId = null) {
         const sheets = google.sheets({ version: 'v4', auth: this.auth });
         const drive = google.drive({ version: 'v3', auth: this.auth });
 
         try {
-            // 1. Tạo spreadsheet mới
-            const spreadsheet = await sheets.spreadsheets.create({
-                resource: {
-                    properties: {
-                        title: title,
+            let spreadsheetId = existingSpreadsheetId;
+            let spreadsheetUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit`;
+
+            // 1. Tạo spreadsheet mới nếu không truyền ID
+            if (!spreadsheetId) {
+                const spreadsheet = await sheets.spreadsheets.create({
+                    resource: {
+                        properties: {
+                            title: title,
+                        },
                     },
-                },
-                fields: 'spreadsheetId,spreadsheetUrl',
-            });
+                    fields: 'spreadsheetId,spreadsheetUrl',
+                });
+                spreadsheetId = spreadsheet.data.spreadsheetId;
+                spreadsheetUrl = spreadsheet.data.spreadsheetUrl;
+            }
 
-            const spreadsheetId = spreadsheet.data.spreadsheetId;
-            const spreadsheetUrl = spreadsheet.data.spreadsheetUrl;
+            // 2. Lấy thông tin Spreadsheet để kiểm tra các Tab hiện có
+            const spreadsheetData = await sheets.spreadsheets.get({ spreadsheetId });
+            const existingSheets = spreadsheetData.data.sheets;
+            
+            const now = new Date();
+            const sheetName = `Export_${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
+            
+            let targetSheetId;
+            const duplicateSheet = existingSheets.find(s => s.properties.title === sheetName);
 
-            // 2. Đẩy dữ liệu vào (Sheet1 mặc định)
+            if (duplicateSheet) {
+                // Nếu trùng tên, lấy ID cũ và xóa dữ liệu cũ
+                targetSheetId = duplicateSheet.properties.sheetId;
+                await sheets.spreadsheets.values.clear({
+                    spreadsheetId,
+                    range: `${sheetName}!A1:Z1000`, // Xóa vùng dữ liệu cũ
+                });
+            } else {
+                // Nếu không trùng, tạo Tab mới
+                const addSheetResponse = await sheets.spreadsheets.batchUpdate({
+                    spreadsheetId,
+                    resource: {
+                        requests: [
+                            {
+                                addSheet: {
+                                    properties: {
+                                        title: sheetName,
+                                    },
+                                },
+                            },
+                        ],
+                    },
+                });
+                targetSheetId = addSheetResponse.data.replies[0].addSheet.properties.sheetId;
+            }
+
+            // 3. Đẩy dữ liệu vào Tab (mới hoặc cũ đã clear)
             const values = [headers, ...rows];
             await sheets.spreadsheets.values.update({
                 spreadsheetId,
-                range: 'A1',
-                valueInputOption: 'RAW',
+                range: `${sheetName}!A1`,
+                valueInputOption: 'USER_ENTERED',
                 resource: {
                     values: values,
                 },
             });
 
-            // 3. Format header (optional but makes it look professional)
-            await this.formatHeader(spreadsheetId, headers.length);
+            // 4. Format header cho Tab đó
+            await this.formatHeader(spreadsheetId, targetSheetId, headers.length);
 
             // 4. Share quyền cho user nếu có email
             if (userEmail) {
@@ -70,7 +113,7 @@ class GoogleSheetService {
 
             return {
                 spreadsheetId,
-                spreadsheetUrl,
+                spreadsheetUrl: `${spreadsheetUrl}#gid=${targetSheetId}`,
             };
         } catch (error) {
             if (error.response && error.response.data) {
@@ -81,7 +124,7 @@ class GoogleSheetService {
         }
     }
 
-    async formatHeader(spreadsheetId, columnCount) {
+    async formatHeader(spreadsheetId, sheetId, columnCount) {
         const sheets = google.sheets({ version: 'v4', auth: this.auth });
         
         // Chuyển số cột thành mã chữ (ví dụ 3 -> C)
@@ -94,7 +137,7 @@ class GoogleSheetService {
                     {
                         repeatCell: {
                             range: {
-                                sheetId: 0,
+                                sheetId: sheetId,
                                 startRowIndex: 0,
                                 endRowIndex: 1,
                                 startColumnIndex: 0,
@@ -118,12 +161,27 @@ class GoogleSheetService {
                     {
                         updateSheetProperties: {
                             properties: {
-                                sheetId: 0,
+                                sheetId: sheetId,
                                 gridProperties: {
-                                    frozenRowCount: 1
+                                    frozenRowCount: 1,
+                                    frozenColumnCount: 1
                                 }
                             },
-                            fields: 'gridProperties.frozenRowCount'
+                            fields: 'gridProperties.frozenRowCount,gridProperties.frozenColumnCount'
+                        }
+                    },
+                    {
+                        updateDimensionProperties: {
+                            range: {
+                                sheetId: sheetId,
+                                dimension: 'COLUMNS',
+                                startIndex: 2, // Cột C (Tiêu đề)
+                                endIndex: 3
+                            },
+                            properties: {
+                                pixelSize: 450 // Độ rộng pixel
+                            },
+                            fields: 'pixelSize'
                         }
                     }
                 ]

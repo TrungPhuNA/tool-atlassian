@@ -23,6 +23,7 @@ const ExportGoogleSheetModal = ({ filters, onClose, showToast }) => {
     const [orderedCols, setOrderedCols] = useState(ALL_COLUMNS);
     const [exporting, setExporting] = useState(false);
     const [userEmail, setUserEmail] = useState('');
+    const [spreadsheetId, setSpreadsheetId] = useState('');
     const [resultUrl, setResultUrl] = useState(null);
 
     const toggleCol = (id) => {
@@ -60,6 +61,7 @@ const ExportGoogleSheetModal = ({ filters, onClose, showToast }) => {
                     sprint: filters.sprints?.length > 0 ? filters.sprints.map(s => s.value).join(',') : undefined,
                 },
                 userEmail: userEmail || undefined,
+                spreadsheetId: spreadsheetId || undefined,
                 title: `Jira Export - ${new Date().toLocaleDateString('vi-VN')}`
             });
 
@@ -137,20 +139,35 @@ const ExportGoogleSheetModal = ({ filters, onClose, showToast }) => {
 
                 <div className="p-6 flex-1 overflow-y-auto max-h-[55vh] space-y-6 bg-slate-50/30">
                     {/* Share Email Input */}
-                    <div className="space-y-2">
-                        <label className="text-xs font-bold text-slate-500 italic flex items-center gap-1.5">
-                            <Mail className="w-3.5 h-3.5" /> Chia sẻ với Email (Tùy chọn)
-                        </label>
-                        <input
-                            type="email"
-                            placeholder="example@gmail.com"
-                            className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50 transition-all"
-                            value={userEmail}
-                            onChange={(e) => setUserEmail(e.target.value)}
-                        />
-                        <p className="text-[10px] text-slate-400 leading-relaxed px-1">
-                            * Nhập email của bạn để có quyền chỉnh sửa file. Nếu để trống, bạn chỉ có thể xem nếu file được để công khai.
-                        </p>
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold text-slate-500 italic flex items-center gap-1.5">
+                                <Mail className="w-3.5 h-3.5" /> Chia sẻ với Email (Tùy chọn)
+                            </label>
+                            <input
+                                type="email"
+                                placeholder="example@gmail.com"
+                                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50 transition-all"
+                                value={userEmail}
+                                onChange={(e) => setUserEmail(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold text-slate-500 italic flex items-center gap-1.5">
+                                <ExternalLink className="w-3.5 h-3.5" /> Hoặc nhập Spreadsheet ID có sẵn
+                            </label>
+                            <input
+                                type="text"
+                                placeholder="1BxiMVs0XRA5nxtd94Gpw8wRF597-b847847..."
+                                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-[11px] font-mono outline-none focus:border-emerald-400 focus:ring-4 focus:ring-emerald-50 transition-all"
+                                value={spreadsheetId}
+                                onChange={(e) => setSpreadsheetId(e.target.value)}
+                            />
+                            <p className="text-[10px] text-slate-400 leading-relaxed px-1">
+                                * Nếu để trống, hệ thống sẽ tự tạo file mới. Nếu lỗi 403, bạn hãy tự tạo file và nhập ID vào đây (phải share quyền Editor cho email Service Account).
+                            </p>
+                        </div>
                     </div>
 
                     <div className="space-y-4">
