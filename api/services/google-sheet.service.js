@@ -4,13 +4,11 @@ const fs = require('fs');
 
 class GoogleSheetService {
     constructor() {
+        // Sử dụng file JSON vật lý để đảm bảo tính ổn định cao nhất
+        const keyPath = path.join(__dirname, '../gg-sheet.json');
+        
         this.auth = new google.auth.GoogleAuth({
-            credentials: {
-                client_email: process.env.GOOGLE_CLIENT_EMAIL,
-                private_key: process.env.GOOGLE_PRIVATE_KEY
-                    ?.replace(/^"|"$/g, '') // Xóa dấu nháy kép ở đầu/cuối nếu có
-                    ?.replace(/\\n/g, '\n'), // Chuyển \n thành ký tự xuống dòng thật
-            },
+            keyFile: keyPath,
             scopes: [
                 'https://www.googleapis.com/auth/spreadsheets',
                 'https://www.googleapis.com/auth/drive'
