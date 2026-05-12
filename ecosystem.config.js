@@ -9,7 +9,8 @@ module.exports = {
       max_memory_restart: '1G',
       env_production: {
         NODE_ENV: 'production',
-        PORT: 5006
+        PORT: 5006,
+        NODE_OPTIONS: '--openssl-legacy-provider'
       }
     }
   ]

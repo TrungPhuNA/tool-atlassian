@@ -7,7 +7,9 @@ class GoogleSheetService {
         this.auth = new google.auth.GoogleAuth({
             credentials: {
                 client_email: process.env.GOOGLE_CLIENT_EMAIL,
-                private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+                private_key: process.env.GOOGLE_PRIVATE_KEY
+                    ?.replace(/^"|"$/g, '') // Xóa dấu nháy kép ở đầu/cuối nếu có
+                    ?.replace(/\\n/g, '\n'), // Chuyển \n thành ký tự xuống dòng thật
             },
             scopes: [
                 'https://www.googleapis.com/auth/spreadsheets',
