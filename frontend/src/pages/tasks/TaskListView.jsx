@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Select from 'react-select';
 import TaskDetailModal from '../../components/TaskDetailModal';
 import ExportExcelModal from '../../components/ExportExcelModal';
-import { Download } from 'lucide-react';
+import ExportGoogleSheetModal from '../../components/ExportGoogleSheetModal';
+import { Download, Share2 } from 'lucide-react';
 
 const TYPE_COLORS = {
     'Story': 'bg-emerald-50 text-emerald-700 border-emerald-100',
@@ -171,6 +172,7 @@ const TaskListView = ({ showToast }) => {
     });
     const [showFilterModal, setShowFilterModal] = useState(false);
     const [showExportModal, setShowExportModal] = useState(false);
+    const [showGoogleSheetModal, setShowGoogleSheetModal] = useState(false);
     const [selectedTaskId, setSelectedTaskId] = useState(null);
 
     const observer = React.useRef();
@@ -246,9 +248,49 @@ const TaskListView = ({ showToast }) => {
     }, [page, fetchTasks]);
 
     const customSelectStyles = {
-        control: (base) => ({ ...base, borderRadius: '12px', border: '1px solid #f1f5f9', backgroundColor: '#f8fafc', padding: '2px', boxShadow: 'none' }),
-        option: (base, state) => ({ ...base, cursor: 'pointer', backgroundColor: state.isFocused ? '#eff6ff' : 'white' }),
+        control: (base) => ({
+            ...base,
+            borderRadius: '12px',
+            border: '1px solid #f1f5f9',
+            backgroundColor: '#f8fafc',
+            padding: '2px',
+            boxShadow: 'none'
+        }),
+        option: (base, state) => ({
+            ...base,
+            cursor: 'pointer',
+            backgroundColor: state.isFocused ? '#eff6ff' : 'white',
+            color: state.isFocused ? '#2563eb' : '#475569'
+        }),
     };
+
+    // Component hiển thị avatar trong danh sách dropdown
+    const CustomOption = ({ innerProps, label, data }) => (
+        <div {...innerProps} className="flex items-center gap-3 px-4 py-2.5 hover:bg-blue-50 cursor-pointer transition-all">
+            {data.avatar ? (
+                <img src={data.avatar} className="w-8 h-8 rounded-full border-2 border-white shadow-sm object-cover" alt="" />
+            ) : (
+                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center border border-slate-200 shadow-sm">
+                    <User className="w-4 h-4 text-slate-400" />
+                </div>
+            )}
+            <span className="text-sm font-semibold text-slate-700">{label}</span>
+        </div>
+    );
+
+    // Component hiển thị avatar trong các tag đã chọn
+    const CustomMultiValueLabel = ({ data, label }) => (
+        <div className="flex items-center gap-2 px-1.5 py-0.5">
+            {data.avatar ? (
+                <img src={data.avatar} className="w-5 h-5 rounded-full border border-white shadow-sm object-cover" alt="" />
+            ) : (
+                <div className="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center border border-slate-300">
+                    <User className="w-3 h-3 text-slate-500" />
+                </div>
+            )}
+            <span className="text-xs font-bold text-slate-700">{label}</span>
+        </div>
+    );
 
     return (
         <div className="max-w-[1600px] mx-auto p-4 md:p-6 space-y-6">
@@ -275,6 +317,12 @@ const TaskListView = ({ showToast }) => {
                         className="flex items-center gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-lg md:rounded-xl text-xs md:text-sm font-bold hover:bg-emerald-100 active:scale-95 transition-all"
                     >
                         <Download className="w-3.5 h-3.5 md:w-4 md:h-4" /> <span className="hidden lg:inline">Xuất Excel</span>
+                    </button>
+                    <button
+                        onClick={() => setShowGoogleSheetModal(true)}
+                        className="flex items-center gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-blue-50 text-blue-600 border border-blue-100 rounded-lg md:rounded-xl text-xs md:text-sm font-bold hover:bg-blue-100 active:scale-95 transition-all"
+                    >
+                        <Share2 className="w-3.5 h-3.5 md:w-4 md:h-4" /> <span className="hidden lg:inline">Google Sheets</span>
                     </button>
                     <button
                         onClick={() => setShowFilterModal(true)}
@@ -399,7 +447,18 @@ const TaskListView = ({ showToast }) => {
 
                                 <div className="space-y-2">
                                     <label className="text-xs font-bold text-slate-500 italic">Người đảm nhận</label>
-                                    <Select isMulti options={filterOptions.users} styles={customSelectStyles} value={filters.assigneeIds} onChange={v => setFilters({ ...filters, assigneeIds: v })} placeholder="Chọn người..." />
+                                    <Select
+                                        isMulti
+                                        options={filterOptions.users}
+                                        styles={customSelectStyles}
+                                        components={{
+                                            Option: CustomOption,
+                                            MultiValueLabel: CustomMultiValueLabel
+                                        }}
+                                        value={filters.assigneeIds}
+                                        onChange={v => setFilters({ ...filters, assigneeIds: v })}
+                                        placeholder="Chọn người..."
+                                    />
                                 </div>
 
                                 <div className="pt-4 border-t border-slate-100">
@@ -439,6 +498,16 @@ const TaskListView = ({ showToast }) => {
                     <ExportExcelModal
                         filters={filters}
                         onClose={() => setShowExportModal(false)}
+                        showToast={showToast}
+                    />
+                )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+                {showGoogleSheetModal && (
+                    <ExportGoogleSheetModal
+                        filters={filters}
+                        onClose={() => setShowGoogleSheetModal(false)}
                         showToast={showToast}
                     />
                 )}
