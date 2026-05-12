@@ -39,6 +39,13 @@ class JiraIssueRepository {
     if (filters.missing_description === 'true') where.has_description = false;
     if (filters.missing_story_points === 'true') where.has_story_points = false;
     if (filters.missing_due_date === 'true') where.has_due_date = false;
+
+    // Lọc theo khoảng thời gian hạn chót (Due Date)
+    if (filters.due_date_from || filters.due_date_to) {
+      where.due_date = {};
+      if (filters.due_date_from) where.due_date[Op.gte] = filters.due_date_from;
+      if (filters.due_date_to) where.due_date[Op.lte] = filters.due_date_to;
+    }
     
     if (filters.search) {
       where[Op.or] = [

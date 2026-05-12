@@ -165,7 +165,9 @@ const TaskListView = ({ showToast }) => {
     sprints: [],
     missing_description: false,
     missing_story_points: false,
-    missing_due_date: false
+    missing_due_date: false,
+    due_date_from: '',
+    due_date_to: ''
   });
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
@@ -208,7 +210,9 @@ const TaskListView = ({ showToast }) => {
         sprint: filters.sprints.length > 0 ? filters.sprints.map(s => s.value).join(',') : undefined,
         missing_description: filters.missing_description || undefined,
         missing_story_points: filters.missing_story_points || undefined,
-        missing_due_date: filters.missing_due_date || undefined
+        missing_due_date: filters.missing_due_date || undefined,
+        due_date_from: filters.due_date_from || undefined,
+        due_date_to: filters.due_date_to || undefined
       };
       const { data } = await client.get('/tasks', { params });
       
@@ -358,21 +362,48 @@ const TaskListView = ({ showToast }) => {
                 <h3 className="font-bold text-slate-800">Bộ lọc thông minh</h3>
                 <X className="w-6 h-6 text-slate-400 cursor-pointer p-1" onClick={() => setShowFilterModal(false)} />
               </div>
-              <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Trạng thái</label>
-                  <Select isMulti options={filterOptions.statuses} styles={customSelectStyles} value={filters.statuses} onChange={v => setFilters({...filters, statuses: v})} placeholder="Chọn status..." />
+              <div className="p-6 space-y-5 max-h-[75vh] overflow-y-auto">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 italic">Trạng thái công việc</label>
+                  <Select isMulti options={filterOptions.statuses} styles={customSelectStyles} value={filters.statuses} onChange={v => setFilters({...filters, statuses: v})} placeholder="Tất cả trạng thái..." />
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Sprint</label>
+                
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 italic">Hạn chót (Due Date)</label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <span className="text-[10px] text-slate-400 font-bold">Từ ngày</span>
+                      <input 
+                        type="date" 
+                        className="w-full p-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm outline-none focus:border-blue-300 transition-all"
+                        value={filters.due_date_from}
+                        onChange={(e) => setFilters({...filters, due_date_from: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-[10px] text-slate-400 font-bold">Đến ngày</span>
+                      <input 
+                        type="date" 
+                        className="w-full p-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm outline-none focus:border-blue-300 transition-all"
+                        value={filters.due_date_to}
+                        onChange={(e) => setFilters({...filters, due_date_to: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 italic">Sprint</label>
                   <Select isMulti options={filterOptions.sprints} styles={customSelectStyles} value={filters.sprints} onChange={v => setFilters({...filters, sprints: v})} placeholder="Chọn sprint..." />
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Người đảm nhận</label>
+                
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 italic">Người đảm nhận</label>
                   <Select isMulti options={filterOptions.users} styles={customSelectStyles} value={filters.assigneeIds} onChange={v => setFilters({...filters, assigneeIds: v})} placeholder="Chọn người..." />
                 </div>
+                
                 <div className="pt-4 border-t border-slate-100">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic block mb-3">Chất lượng dữ liệu</span>
+                  <span className="text-xs font-bold text-slate-500 italic block mb-3">Chất lượng dữ liệu</span>
                   <div className="grid grid-cols-3 gap-2">
                     {[
                       { key: 'missing_description', label: 'Thiếu mô tả' },
@@ -382,7 +413,7 @@ const TaskListView = ({ showToast }) => {
                       <button 
                         key={opt.key}
                         onClick={() => setFilters({...filters, [opt.key]: !filters[opt.key]})}
-                        className={`px-2 py-2 rounded-xl text-[10px] font-bold border transition-all ${filters[opt.key] ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-white text-slate-500 border-slate-100'}`}
+                        className={`px-2 py-3 rounded-xl text-[11px] font-bold border transition-all ${filters[opt.key] ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-white text-slate-500 border-slate-100 hover:bg-slate-50'}`}
                       >
                         {opt.label}
                       </button>
@@ -390,9 +421,9 @@ const TaskListView = ({ showToast }) => {
                   </div>
                 </div>
               </div>
-              <div className="px-6 py-6 bg-slate-50 flex justify-between gap-3">
-                <button onClick={() => setFilters({ search: '', statuses: [], assigneeIds: [], sprints: [], missing_description: false, missing_story_points: false, missing_due_date: false })} className="text-sm font-bold text-slate-400 hover:text-slate-600">Làm mới</button>
-                <button onClick={() => setShowFilterModal(false)} className="px-10 py-3 bg-blue-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-100 active:scale-95 transition-all">Áp dụng</button>
+              <div className="px-6 py-6 bg-slate-50 flex justify-between gap-3 items-center">
+                <button onClick={() => setFilters({ search: '', statuses: [], assigneeIds: [], sprints: [], missing_description: false, missing_story_points: false, missing_due_date: false, due_date_from: '', due_date_to: '' })} className="text-sm font-bold text-slate-400 hover:text-red-500 transition-colors">Làm mới bộ lọc</button>
+                <button onClick={() => setShowFilterModal(false)} className="px-10 py-3.5 bg-blue-600 text-white rounded-2xl font-bold shadow-xl shadow-blue-100 active:scale-95 transition-all">Áp dụng</button>
               </div>
             </motion.div>
           </div>

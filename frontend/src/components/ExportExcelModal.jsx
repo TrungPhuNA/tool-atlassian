@@ -168,9 +168,10 @@ const ExportExcelModal = ({ filters, onClose, showToast }) => {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" onClick={onClose}>
       <motion.div 
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ duration: 0.15 }}
         className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-slate-200"
         onClick={e => e.stopPropagation()}
       >
@@ -181,7 +182,7 @@ const ExportExcelModal = ({ filters, onClose, showToast }) => {
             </div>
             <div>
               <h3 className="text-lg font-bold text-slate-800">Xuất dữ liệu Excel</h3>
-              <p className="text-xs font-semibold text-slate-400">Định dạng chuẩn - Cố định tiêu đề</p>
+              <p className="text-xs font-semibold text-slate-400 italic">Định dạng chuẩn - Cố định tiêu đề</p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-xl text-slate-400 transition-all">
@@ -189,21 +190,42 @@ const ExportExcelModal = ({ filters, onClose, showToast }) => {
           </button>
         </div>
 
-        <div className="p-6 flex-1 overflow-y-auto max-h-[55vh] space-y-3 bg-slate-50/30">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Danh sách các trường dữ liệu</p>
+        <div className="p-6 flex-1 overflow-y-auto max-h-[55vh] space-y-4 bg-slate-50/30">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs font-bold text-slate-500 italic">Danh sách các trường dữ liệu</p>
+            <span className="text-[10px] text-slate-400 font-medium">Kéo thả hoặc nhấn mũi tên để sắp xếp</span>
+          </div>
+          
           <div className="space-y-2">
             {orderedCols.map((col, index) => (
               <div 
                 key={col.id}
-                className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-all ${selectedCols.includes(col.id) ? 'bg-white border-blue-200 shadow-sm' : 'bg-slate-50 border-slate-100 opacity-60'}`}
+                className={`flex items-center gap-3 p-3 rounded-2xl border transition-all ${selectedCols.includes(col.id) ? 'bg-white border-blue-200 shadow-sm' : 'bg-slate-50 border-slate-100 opacity-60'}`}
               >
-                <button onClick={() => toggleCol(col.id)} className={`w-6 h-6 rounded-lg border flex items-center justify-center transition-all ${selectedCols.includes(col.id) ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-slate-300'}`}>
+                <button 
+                  onClick={() => toggleCol(col.id)} 
+                  className={`w-6 h-6 rounded-lg border flex items-center justify-center transition-all ${selectedCols.includes(col.id) ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-50' : 'bg-white border-slate-300'}`}
+                >
                   {selectedCols.includes(col.id) && <CheckCircle2 className="w-4 h-4" />}
                 </button>
-                <span className={`flex-1 text-sm font-bold ${selectedCols.includes(col.id) ? 'text-slate-700' : 'text-slate-400'}`}>{col.label}</span>
+                <span className={`flex-1 text-sm font-bold ${selectedCols.includes(col.id) ? 'text-slate-700' : 'text-slate-400'}`}>
+                  {col.label}
+                </span>
                 <div className="flex items-center gap-1 bg-slate-50 rounded-lg p-1 border border-slate-100">
-                  <button disabled={index === 0} onClick={() => moveCol(index, -1)} className="p-1.5 hover:bg-white hover:text-blue-600 rounded-md text-slate-400 disabled:opacity-10 transition-all"><ChevronUp className="w-4 h-4" /></button>
-                  <button disabled={index === orderedCols.length - 1} onClick={() => moveCol(index, 1)} className="p-1.5 hover:bg-white hover:text-blue-600 rounded-md text-slate-400 disabled:opacity-10 transition-all"><ChevronDown className="w-4 h-4" /></button>
+                  <button 
+                    disabled={index === 0} 
+                    onClick={() => moveCol(index, -1)} 
+                    className="p-1.5 hover:bg-white hover:text-blue-600 rounded-md text-slate-400 disabled:opacity-10 transition-all active:scale-90"
+                  >
+                    <ChevronUp className="w-4 h-4" />
+                  </button>
+                  <button 
+                    disabled={index === orderedCols.length - 1} 
+                    onClick={() => moveCol(index, 1)} 
+                    className="p-1.5 hover:bg-white hover:text-blue-600 rounded-md text-slate-400 disabled:opacity-10 transition-all active:scale-90"
+                  >
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
             ))}
