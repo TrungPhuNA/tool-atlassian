@@ -4,6 +4,8 @@ import client from '../../api/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import Select from 'react-select';
 import TaskDetailModal from '../../components/TaskDetailModal';
+import ExportExcelModal from '../../components/ExportExcelModal';
+import { Download } from 'lucide-react';
 
 const TYPE_COLORS = {
   'Story': 'bg-emerald-50 text-emerald-700 border-emerald-100',
@@ -148,7 +150,7 @@ const TaskCard = memo(React.forwardRef(({ task, onSelect }, ref) => {
   );
 }));
 
-const TaskListView = () => {
+const TaskListView = ({ showToast }) => {
   const [tasks, setTasks] = useState([]);
   const [stats, setStats] = useState({ total: 0, standard: 0, missingDescription: 0, missingStoryPoints: 0, missingDueDate: 0 });
   const [loading, setLoading] = useState(false);
@@ -166,6 +168,7 @@ const TaskListView = () => {
     missing_due_date: false
   });
   const [showFilterModal, setShowFilterModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
 
   const observer = React.useRef();
@@ -263,6 +266,12 @@ const TaskListView = () => {
               value={filters.search} onChange={(e) => setFilters({...filters, search: e.target.value})}
             />
           </div>
+          <button 
+            onClick={() => setShowExportModal(true)}
+            className="flex items-center gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-lg md:rounded-xl text-xs md:text-sm font-bold hover:bg-emerald-100 active:scale-95 transition-all"
+          >
+            <Download className="w-3.5 h-3.5 md:w-4 md:h-4" /> <span className="hidden lg:inline">Xuất Excel</span>
+          </button>
           <button 
             onClick={() => setShowFilterModal(true)}
             className="flex items-center gap-2 px-3 md:px-5 py-2 md:py-2.5 bg-blue-600 text-white rounded-lg md:rounded-xl text-xs md:text-sm font-bold shadow-lg shadow-blue-100 active:scale-95 transition-all"
@@ -392,6 +401,16 @@ const TaskListView = () => {
 
       <AnimatePresence>
         {selectedTaskId && <TaskDetailModal taskId={selectedTaskId} onClose={() => setSelectedTaskId(null)} />}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showExportModal && (
+          <ExportExcelModal 
+            filters={filters} 
+            onClose={() => setShowExportModal(false)} 
+            showToast={showToast} 
+          />
+        )}
       </AnimatePresence>
     </div>
   );
