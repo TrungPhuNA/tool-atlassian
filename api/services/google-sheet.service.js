@@ -51,7 +51,7 @@ class GoogleSheetService {
             const existingSheets = spreadsheetData.data.sheets;
             
             const now = new Date();
-            const sheetName = `Export_${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
+            const sheetName = `ai-${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
             
             let targetSheetId;
             const duplicateSheet = existingSheets.find(s => s.properties.title === sheetName);

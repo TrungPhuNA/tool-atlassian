@@ -3,10 +3,11 @@ import { X, ExternalLink, Target, Hash, Calendar, User, Loader2, AlertCircle } f
 import client from '../api/client';
 import { motion } from 'framer-motion';
 
-const TaskDetailModal = ({ taskId, onClose }) => {
+const TaskDetailModal = ({ taskId, onClose, showToast }) => {
   const [task, setTask] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [sendingNotify, setSendingNotify] = useState(false);
 
   useEffect(() => {
     if (taskId) fetchTaskDetail();
@@ -156,13 +157,41 @@ const TaskDetailModal = ({ taskId, onClose }) => {
                     </div>
                   </div>
 
-                  <div className="pt-2">
+                  <div className="pt-2 space-y-2">
                     <a 
                       href={`https://${task.jira_domain}/browse/${task.issue_key}`} target="_blank" rel="noreferrer"
                       className="flex items-center justify-center gap-2 w-full py-3 bg-blue-600 text-white rounded-xl text-[10px] font-bold hover:bg-blue-700 transition-all shadow-md cursor-pointer"
                     >
                       Mở trên Jira <ExternalLink className="w-3.5 h-3.5" />
                     </a>
+
+                    {JSON.parse(localStorage.getItem('user'))?.role === 'admin' && (
+                      <button 
+                        disabled={sendingNotify}
+                        onClick={async () => {
+                          setSendingNotify(true);
+                          try {
+                            const { data } = await client.post(`/tasks/${task.issue_key}/notify`);
+                            if (data.status === 'success') {
+                              showToast?.('success', 'Đã gửi thông báo đến Google Chat thành công!');
+                            }
+                          } catch (err) {
+                            console.error(err);
+                            showToast?.('error', 'Gửi thông báo thất bại. Vui lòng kiểm tra cấu hình webhook.');
+                          } finally {
+                            setSendingNotify(false);
+                          }
+                        }}
+                        className={`flex items-center justify-center gap-2 w-full py-3 bg-amber-500 text-white rounded-xl text-[10px] font-bold hover:bg-amber-600 transition-all shadow-md cursor-pointer ${sendingNotify ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      >
+                        {sendingNotify ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <AlertCircle className="w-3.5 h-3.5" />
+                        )}
+                        {sendingNotify ? 'Đang gửi...' : 'Bắn thông báo'}
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

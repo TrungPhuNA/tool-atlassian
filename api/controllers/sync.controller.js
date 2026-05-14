@@ -1,5 +1,6 @@
 const syncService = require('../services/sync.service');
 const jiraIssueRepository = require('../repositories/jira-issue.repository');
+const notificationService = require('../services/notification.service');
 
 class SyncController {
   async triggerSync(req, res, next) {
@@ -81,6 +82,20 @@ class SyncController {
       const success = await syncService.deleteJob(req.params.id);
       res.json({ status: success ? 'success' : 'fail' });
     } catch (err) { next(err); }
+  }
+
+  async sendTaskNotification(req, res, next) {
+    try {
+      const task = await jiraIssueRepository.getById(req.params.id);
+      if (!task) {
+        return res.status(404).json({ status: 'fail', message: 'Không tìm thấy task' });
+      }
+
+      await notificationService.sendTaskNotification(task);
+      res.json({ status: 'success', message: 'Đã gửi thông báo thành công' });
+    } catch (err) {
+      next(err);
+    }
   }
 
   async getFilterOptions(req, res, next) {

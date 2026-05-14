@@ -9,6 +9,9 @@ router.get('/filters/options', authMiddleware, syncController.getFilterOptions);
 router.get('/', authMiddleware, syncController.getIssues);
 router.get('/:id', authMiddleware, syncController.getIssueDetail);
 
+// Notify
+router.post('/:id/notify', authMiddleware, syncController.sendTaskNotification);
+
 // Export
 router.post('/export/google-sheet', authMiddleware, exportController.exportToGoogleSheet);
 

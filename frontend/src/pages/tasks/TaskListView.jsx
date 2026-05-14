@@ -490,7 +490,13 @@ const TaskListView = ({ showToast }) => {
             </AnimatePresence>
 
             <AnimatePresence>
-                {selectedTaskId && <TaskDetailModal taskId={selectedTaskId} onClose={() => setSelectedTaskId(null)} />}
+                {selectedTaskId && (
+                    <TaskDetailModal 
+                        taskId={selectedTaskId} 
+                        onClose={() => setSelectedTaskId(null)} 
+                        showToast={showToast}
+                    />
+                )}
             </AnimatePresence>
 
             <AnimatePresence>
