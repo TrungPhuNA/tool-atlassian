@@ -26,7 +26,11 @@ class JiraIssueRepository {
         if (filters.status) {
             const statuses = typeof filters.status === 'string' ? filters.status.split(',') : (Array.isArray(filters.status) ? filters.status : [filters.status]);
             const cleanStatuses = statuses.filter(s => s && s !== 'All');
-            if (cleanStatuses.length > 0) where.status = { [Op.in]: cleanStatuses };
+            if (cleanStatuses.length > 0) {
+                // Kiểm tra xem có lọc loại bỏ không (status_exclude)
+                const exclude = filters.status_exclude === 'true' || filters.status_exclude === true;
+                where.status = exclude ? { [Op.notIn]: cleanStatuses } : { [Op.in]: cleanStatuses };
+            }
         }
 
         if (filters.sprint) {

@@ -162,6 +162,7 @@ const TaskListView = ({ showToast }) => {
     const [filters, setFilters] = useState({
         search: '',
         statuses: [],
+        status_exclude: false, // Mặc định là lọc đúng (false), true là lọc loại bỏ
         assigneeIds: [],
         sprints: [],
         missing_description: false,
@@ -208,6 +209,7 @@ const TaskListView = ({ showToast }) => {
                 limit: 50,
                 search: filters.search?.trim() || undefined,
                 status: filters.statuses.length > 0 ? filters.statuses.map(s => s.value).join(',') : undefined,
+                status_exclude: filters.statuses.length > 0 ? filters.status_exclude : undefined, // Chỉ truyền status_exclude khi có chọn trạng thái
                 assignee_id: filters.assigneeIds.length > 0 ? filters.assigneeIds.map(u => u.value).join(',') : undefined,
                 sprint: filters.sprints.length > 0 ? filters.sprints.map(s => s.value).join(',') : undefined,
                 missing_description: filters.missing_description || undefined,
@@ -412,7 +414,25 @@ const TaskListView = ({ showToast }) => {
                             </div>
                             <div className="p-6 space-y-5 max-h-[75vh] overflow-y-auto">
                                 <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-500 italic">Trạng thái công việc</label>
+                                    <div className="flex items-center justify-between">
+                                        <label className="text-xs font-bold text-slate-500 italic">Trạng thái công việc</label>
+                                        <div className="flex items-center gap-2 bg-slate-100 p-0.5 rounded-lg text-[10px] font-bold">
+                                            <button
+                                                type="button"
+                                                onClick={() => setFilters({ ...filters, status_exclude: false })}
+                                                className={`px-2.5 py-1 rounded-md transition-all ${!filters.status_exclude ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                                            >
+                                                Lọc đúng
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setFilters({ ...filters, status_exclude: true })}
+                                                className={`px-2.5 py-1 rounded-md transition-all ${filters.status_exclude ? 'bg-red-50 text-red-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                                            >
+                                                Lọc loại bỏ
+                                            </button>
+                                        </div>
+                                    </div>
                                     <Select isMulti options={filterOptions.statuses} styles={customSelectStyles} value={filters.statuses} onChange={v => setFilters({ ...filters, statuses: v })} placeholder="Tất cả trạng thái..." />
                                 </div>
 
@@ -481,7 +501,7 @@ const TaskListView = ({ showToast }) => {
                                 </div>
                             </div>
                             <div className="px-6 py-6 bg-slate-50 flex justify-between gap-3 items-center">
-                                <button onClick={() => setFilters({ search: '', statuses: [], assigneeIds: [], sprints: [], missing_description: false, missing_story_points: false, missing_due_date: false, due_date_from: '', due_date_to: '' })} className="text-sm font-bold text-slate-400 hover:text-red-500 transition-colors">Làm mới bộ lọc</button>
+                                <button onClick={() => setFilters({ search: '', statuses: [], status_exclude: false, assigneeIds: [], sprints: [], missing_description: false, missing_story_points: false, missing_due_date: false, due_date_from: '', due_date_to: '' })} className="text-sm font-bold text-slate-400 hover:text-red-500 transition-colors">Làm mới bộ lọc</button>
                                 <button onClick={() => setShowFilterModal(false)} className="px-10 py-3.5 bg-blue-600 text-white rounded-2xl font-bold shadow-xl shadow-blue-100 active:scale-95 transition-all">Áp dụng</button>
                             </div>
                         </motion.div>
