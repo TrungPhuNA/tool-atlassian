@@ -57,6 +57,7 @@ const ExportExcelModal = ({ filters, onClose, showToast }) => {
                 limit: 5000,
                 status: filters.statuses?.length > 0 ? filters.statuses.map(s => s.value).join(',') : undefined,
                 status_exclude: filters.statuses?.length > 0 ? filters.status_exclude : undefined,
+                task_hierarchy: filters.task_hierarchy && filters.task_hierarchy !== 'all' ? filters.task_hierarchy : undefined,
                 assignee_id: filters.assigneeIds?.length > 0 ? filters.assigneeIds.map(u => u.value).join(',') : undefined,
                 sprint: filters.sprints?.length > 0 ? filters.sprints.map(s => s.value).join(',') : undefined,
             };

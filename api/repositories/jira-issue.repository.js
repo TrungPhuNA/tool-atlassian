@@ -39,6 +39,22 @@ class JiraIssueRepository {
             if (cleanSprints.length > 0) where.sprint_name = { [Op.in]: cleanSprints };
         }
 
+        // ==========================================
+        // BỘ LỌC PHÂN CẤP TASK (TASK HIERARCHY)
+        // Mục đích: Cho phép lọc lấy riêng task cha, lấy riêng task con, hoặc cả hai.
+        // Logic xử lý chính:
+        // - Nếu là 'parent' (Task cha): Lọc các bản ghi có parent_id là null.
+        // - Nếu là 'subtask' (Task con): Lọc các bản ghi có parent_id khác null (tức là có liên kết cha con).
+        // - Mặc định (all hoặc không chọn): Không áp dụng điều kiện lọc parent_id để lấy toàn bộ cả hai loại.
+        // ==========================================
+        if (filters.task_hierarchy) {
+            if (filters.task_hierarchy === 'parent') {
+                where.parent_id = null;
+            } else if (filters.task_hierarchy === 'subtask') {
+                where.parent_id = { [Op.ne]: null };
+            }
+        }
+
         // Bộ lọc chất lượng dữ liệu (Data Quality)
         if (filters.missing_description === 'true') where.has_description = false;
         if (filters.missing_story_points === 'true') where.has_story_points = false;

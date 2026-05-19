@@ -163,6 +163,7 @@ const TaskListView = ({ showToast }) => {
         search: '',
         statuses: [],
         status_exclude: false, // Mặc định là lọc đúng (false), true là lọc loại bỏ
+        task_hierarchy: 'all', // Lọc phân cấp task: 'all' (tất cả), 'parent' (chỉ task cha), 'subtask' (chỉ task con)
         assigneeIds: [],
         sprints: [],
         missing_description: false,
@@ -210,6 +211,7 @@ const TaskListView = ({ showToast }) => {
                 search: filters.search?.trim() || undefined,
                 status: filters.statuses.length > 0 ? filters.statuses.map(s => s.value).join(',') : undefined,
                 status_exclude: filters.statuses.length > 0 ? filters.status_exclude : undefined, // Chỉ truyền status_exclude khi có chọn trạng thái
+                task_hierarchy: filters.task_hierarchy && filters.task_hierarchy !== 'all' ? filters.task_hierarchy : undefined, // Chỉ truyền khi khác 'all'
                 assignee_id: filters.assigneeIds.length > 0 ? filters.assigneeIds.map(u => u.value).join(',') : undefined,
                 sprint: filters.sprints.length > 0 ? filters.sprints.map(s => s.value).join(',') : undefined,
                 missing_description: filters.missing_description || undefined,
@@ -436,6 +438,38 @@ const TaskListView = ({ showToast }) => {
                                     <Select isMulti options={filterOptions.statuses} styles={customSelectStyles} value={filters.statuses} onChange={v => setFilters({ ...filters, statuses: v })} placeholder="Tất cả trạng thái..." />
                                 </div>
 
+                                {/* ==========================================
+                                    BỘ LỌC PHÂN CẤP TASK (TASK HIERARCHY)
+                                    Mục đích: Cho phép người dùng lọc nhanh giữa task cha và task con hoặc hiển thị cả hai.
+                                    Logic xử lý chính:
+                                    - Mặc định: 'all' hiển thị toàn bộ.
+                                    - 'parent': chỉ lấy các task cha (bản ghi có parent_id = null).
+                                    - 'subtask': chỉ lấy các task con/phụ (bản ghi có parent_id != null).
+                                   ========================================== */}
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-slate-500 italic">Phân cấp công việc</label>
+                                    <div className="grid grid-cols-3 gap-2 bg-slate-100 p-1 rounded-xl">
+                                        {[
+                                            { key: 'all', label: 'Tất cả' },
+                                            { key: 'parent', label: 'Chỉ task cha' },
+                                            { key: 'subtask', label: 'Chỉ task con' }
+                                        ].map(opt => (
+                                            <button
+                                                key={opt.key}
+                                                type="button"
+                                                onClick={() => setFilters({ ...filters, task_hierarchy: opt.key })}
+                                                className={`py-2 rounded-lg text-xs font-bold transition-all ${
+                                                    (filters.task_hierarchy || 'all') === opt.key 
+                                                        ? 'bg-white text-blue-600 shadow-sm' 
+                                                        : 'text-slate-500 hover:text-slate-700'
+                                                }`}
+                                            >
+                                                {opt.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
                                 <div className="space-y-2">
                                     <label className="text-xs font-bold text-slate-500 italic">Hạn chót (Due Date)</label>
                                     <div className="grid grid-cols-2 gap-4">
@@ -501,7 +535,7 @@ const TaskListView = ({ showToast }) => {
                                 </div>
                             </div>
                             <div className="px-6 py-6 bg-slate-50 flex justify-between gap-3 items-center">
-                                <button onClick={() => setFilters({ search: '', statuses: [], status_exclude: false, assigneeIds: [], sprints: [], missing_description: false, missing_story_points: false, missing_due_date: false, due_date_from: '', due_date_to: '' })} className="text-sm font-bold text-slate-400 hover:text-red-500 transition-colors">Làm mới bộ lọc</button>
+                                <button onClick={() => setFilters({ search: '', statuses: [], status_exclude: false, task_hierarchy: 'all', assigneeIds: [], sprints: [], missing_description: false, missing_story_points: false, missing_due_date: false, due_date_from: '', due_date_to: '' })} className="text-sm font-bold text-slate-400 hover:text-red-500 transition-colors">Làm mới bộ lọc</button>
                                 <button onClick={() => setShowFilterModal(false)} className="px-10 py-3.5 bg-blue-600 text-white rounded-2xl font-bold shadow-xl shadow-blue-100 active:scale-95 transition-all">Áp dụng</button>
                             </div>
                         </motion.div>
