@@ -9,6 +9,9 @@ router.get('/filters/options', authMiddleware, syncController.getFilterOptions);
 router.get('/', authMiddleware, syncController.getIssues);
 router.get('/:id', authMiddleware, syncController.getIssueDetail);
 
+// Cập nhật trường cục bộ
+router.patch('/:id/solution-discussion', authMiddleware, syncController.updateSolutionDiscussion);
+
 // Notify
 router.post('/:id/notify', authMiddleware, syncController.sendTaskNotification);
 

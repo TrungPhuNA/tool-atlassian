@@ -60,6 +60,9 @@ class JiraIssueRepository {
         if (filters.missing_story_points === 'true') where.has_story_points = false;
         if (filters.missing_due_date === 'true') where.has_due_date = false;
 
+        // Bộ lọc cần trao đổi giải pháp
+        if (filters.needs_solution_discussion === 'true') where.needs_solution_discussion = true;
+
         // Lọc theo khoảng thời gian hạn chót (Due Date)
         if (filters.due_date_from || filters.due_date_to) {
             where.due_date = {};
@@ -79,11 +82,17 @@ class JiraIssueRepository {
         const limit = parseInt(filters.limit) || 30;
         const offset = (page - 1) * limit;
 
+        // Xác định thứ tự sắp xếp
+        let order = [['start_date', 'DESC']];
+        if (filters.order_by === 'assignee_name') {
+            order = [['assignee_name', 'ASC'], ['start_date', 'DESC']];
+        }
+
         const { rows, count } = await JiraIssue.findAndCountAll({
             where,
             limit,
             offset,
-            order: [['start_date', 'DESC']],
+            order,
             attributes: { exclude: ['jira_data'] },
             include: [
                 {
@@ -178,6 +187,12 @@ class JiraIssueRepository {
 
     async findByJiraId(jiraId) {
         return JiraIssue.findOne({ where: { jira_account_id: jiraId } }); // Lưu ý: mapping này sẽ làm sau
+    }
+
+    async updateSolutionDiscussion(id, value) {
+        const issue = await JiraIssue.findByPk(id);
+        if (!issue) return null;
+        return issue.update({ needs_solution_discussion: value });
     }
 }
 

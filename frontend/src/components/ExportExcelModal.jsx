@@ -16,6 +16,7 @@ const ALL_COLUMNS = [
     { id: 'sprint_name', label: 'Sprint', default: true },
     { id: 'start_date', label: 'Ngày bắt đầu', default: false },
     { id: 'due_date', label: 'Hạn chót', default: true },
+    { id: 'needs_solution_discussion', label: 'Có cần trao đổi giải pháp hay không ?', default: true },
 ];
 
 /**
@@ -110,6 +111,8 @@ const ExportExcelModal = ({ filters, onClose, showToast }) => {
                         val = new Date(val).toLocaleDateString('vi-VN');
                     } else if (col.id === 'story_points') {
                         val = val || 0;
+                    } else if (col.id === 'needs_solution_discussion') {
+                        val = val ? 'Có' : 'Không';
                     }
                     rowData[col.id] = val || '';
                 });

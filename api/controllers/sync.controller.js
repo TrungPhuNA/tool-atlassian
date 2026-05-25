@@ -104,6 +104,15 @@ class SyncController {
       res.json({ status: 'success', data: options });
     } catch (err) { next(err); }
   }
+
+  async updateSolutionDiscussion(req, res, next) {
+    try {
+      const { needs_solution_discussion } = req.body;
+      const issue = await jiraIssueRepository.updateSolutionDiscussion(req.params.id, needs_solution_discussion);
+      if (!issue) return res.status(404).json({ status: 'fail', message: 'Không tìm thấy task' });
+      res.json({ status: 'success', data: issue });
+    } catch (err) { next(err); }
+  }
 }
 
 module.exports = new SyncController();

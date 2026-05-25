@@ -8,10 +8,11 @@ class ExportController {
 
             // 1. Lấy dữ liệu tasks dựa trên filter
             // Tăng limit để lấy toàn bộ dữ liệu cần xuất (ví dụ tối đa 5000 dòng)
-            const queryParams = { 
-                ...filters, 
-                limit: 5000, 
-                page: 1 
+            const queryParams = {
+                ...filters,
+                limit: 5000,
+                page: 1,
+                order_by: 'assignee_name'
             };
             const { rows } = await jiraIssueRepository.getAll(queryParams);
 
@@ -36,6 +37,9 @@ class ExportController {
                     }
                     if (col.id === 'story_points') {
                         return val || 0;
+                    }
+                    if (col.id === 'needs_solution_discussion') {
+                        return val ? 'Có' : 'Không';
                     }
                     return val || '';
                 });

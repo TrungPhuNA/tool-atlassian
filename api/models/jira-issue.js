@@ -109,6 +109,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       defaultValue: false
     },
+    needs_solution_discussion: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      comment: 'Có cần trao đổi giải pháp hay không'
+    },
     jira_domain: {
       type: DataTypes.STRING,
       allowNull: true,

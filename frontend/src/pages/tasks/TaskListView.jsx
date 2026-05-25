@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, memo } from 'react';
-import { Search, Filter, Calendar, User, RefreshCw, X, AlertCircle, Copy, Check, Info, LayoutList, CheckCircle2 } from 'lucide-react';
+import { Search, Filter, Calendar, User, RefreshCw, X, AlertCircle, Copy, Check, Info, LayoutList, CheckCircle2, MessageCircle } from 'lucide-react';
 import client from '../../api/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import Select from 'react-select';
@@ -29,6 +29,7 @@ const TaskRow = memo(React.forwardRef(({ task, onSelect }, ref) => {
     const hasDesc = !!task.has_description;
     const hasSP = !!(task.story_points && parseFloat(task.story_points) > 0);
     const hasDue = !!task.due_date;
+    const needsDiscussion = !!task.needs_solution_discussion;
 
     return (
         <tr
@@ -56,6 +57,7 @@ const TaskRow = memo(React.forwardRef(({ task, onSelect }, ref) => {
                         {!hasDesc && <span className="px-1.5 py-0.5 bg-amber-50 text-amber-600 text-[9px] font-bold rounded border border-amber-100 leading-none">Thiếu mô tả</span>}
                         {!hasSP && <span className="px-1.5 py-0.5 bg-orange-50 text-orange-600 text-[9px] font-bold rounded border border-orange-100 leading-none">Chưa chấm SP</span>}
                         {!hasDue && <span className="px-1.5 py-0.5 bg-rose-50 text-rose-600 text-[9px] font-bold rounded border border-rose-100 leading-none">Thiếu hạn</span>}
+                        {needsDiscussion && <span className="px-1.5 py-0.5 bg-purple-50 text-purple-600 text-[9px] font-bold rounded border border-purple-100 leading-none flex items-center gap-0.5"><MessageCircle className="w-2.5 h-2.5" /> Trao đổi</span>}
                         <span className="text-sm font-semibold text-slate-700 line-clamp-1 group-hover:text-blue-600 transition-colors">{task.summary}</span>
                     </div>
                     {task.sprint_name && (
@@ -97,6 +99,7 @@ const TaskCard = memo(React.forwardRef(({ task, onSelect }, ref) => {
     const hasDesc = !!task.has_description;
     const hasSP = !!(task.story_points && parseFloat(task.story_points) > 0);
     const hasDue = !!task.due_date;
+    const needsDiscussion = !!task.needs_solution_discussion;
 
     return (
         <motion.div
@@ -124,6 +127,7 @@ const TaskCard = memo(React.forwardRef(({ task, onSelect }, ref) => {
                     {!hasDesc && <span className="px-1.5 py-0.5 bg-amber-50 text-amber-600 text-[9px] font-bold rounded border border-amber-100">Thiếu mô tả</span>}
                     {!hasSP && <span className="px-1.5 py-0.5 bg-orange-50 text-orange-600 text-[9px] font-bold rounded border border-orange-100">Chưa SP</span>}
                     {!hasDue && <span className="px-1.5 py-0.5 bg-rose-50 text-rose-600 text-[9px] font-bold rounded border border-rose-100">Thiếu hạn</span>}
+                    {needsDiscussion && <span className="px-1.5 py-0.5 bg-purple-50 text-purple-600 text-[9px] font-bold rounded border border-purple-100 flex items-center gap-0.5"><MessageCircle className="w-2.5 h-2.5" /> Trao đổi</span>}
                 </div>
             </div>
 
@@ -169,6 +173,7 @@ const TaskListView = ({ showToast }) => {
         missing_description: false,
         missing_story_points: false,
         missing_due_date: false,
+        needs_solution_discussion: false,
         due_date_from: '',
         due_date_to: ''
     });
@@ -217,6 +222,7 @@ const TaskListView = ({ showToast }) => {
                 missing_description: filters.missing_description || undefined,
                 missing_story_points: filters.missing_story_points || undefined,
                 missing_due_date: filters.missing_due_date || undefined,
+                needs_solution_discussion: filters.needs_solution_discussion || undefined,
                 due_date_from: filters.due_date_from || undefined,
                 due_date_to: filters.due_date_to || undefined
             };
@@ -517,11 +523,12 @@ const TaskListView = ({ showToast }) => {
 
                                 <div className="pt-4 border-t border-slate-100">
                                     <span className="text-xs font-bold text-slate-500 italic block mb-3">Chất lượng dữ liệu</span>
-                                    <div className="grid grid-cols-3 gap-2">
+                                    <div className="grid grid-cols-2 gap-2">
                                         {[
                                             { key: 'missing_description', label: 'Thiếu mô tả' },
                                             { key: 'missing_story_points', label: 'Thiếu SP' },
-                                            { key: 'missing_due_date', label: 'Thiếu hạn' }
+                                            { key: 'missing_due_date', label: 'Thiếu hạn' },
+                                            { key: 'needs_solution_discussion', label: 'Cần trao đổi GP' }
                                         ].map(opt => (
                                             <button
                                                 key={opt.key}
@@ -535,7 +542,7 @@ const TaskListView = ({ showToast }) => {
                                 </div>
                             </div>
                             <div className="px-6 py-6 bg-slate-50 flex justify-between gap-3 items-center">
-                                <button onClick={() => setFilters({ search: '', statuses: [], status_exclude: false, task_hierarchy: 'all', assigneeIds: [], sprints: [], missing_description: false, missing_story_points: false, missing_due_date: false, due_date_from: '', due_date_to: '' })} className="text-sm font-bold text-slate-400 hover:text-red-500 transition-colors">Làm mới bộ lọc</button>
+                                <button onClick={() => setFilters({ search: '', statuses: [], status_exclude: false, task_hierarchy: 'all', assigneeIds: [], sprints: [], missing_description: false, missing_story_points: false, missing_due_date: false, needs_solution_discussion: false, due_date_from: '', due_date_to: '' })} className="text-sm font-bold text-slate-400 hover:text-red-500 transition-colors">Làm mới bộ lọc</button>
                                 <button onClick={() => setShowFilterModal(false)} className="px-10 py-3.5 bg-blue-600 text-white rounded-2xl font-bold shadow-xl shadow-blue-100 active:scale-95 transition-all">Áp dụng</button>
                             </div>
                         </motion.div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, ExternalLink, Target, Hash, Calendar, User, Loader2, AlertCircle } from 'lucide-react';
+import { X, ExternalLink, Target, Hash, Calendar, User, Loader2, AlertCircle, MessageCircle } from 'lucide-react';
 import client from '../api/client';
 import { motion } from 'framer-motion';
 
@@ -8,6 +8,7 @@ const TaskDetailModal = ({ taskId, onClose, showToast }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [sendingNotify, setSendingNotify] = useState(false);
+  const [updatingDiscussion, setUpdatingDiscussion] = useState(false);
 
   useEffect(() => {
     if (taskId) fetchTaskDetail();
@@ -23,11 +24,30 @@ const TaskDetailModal = ({ taskId, onClose, showToast }) => {
       } else {
         setError('Không thể tải thông tin công việc.');
       }
-    } catch (err) { 
+    } catch (err) {
       console.error(err);
       setError('Lỗi kết nối server hoặc Task không tồn tại.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const toggleDiscussion = async () => {
+    setUpdatingDiscussion(true);
+    try {
+      const newValue = !task.needs_solution_discussion;
+      const { data } = await client.patch(`/tasks/${task.id}/solution-discussion`, {
+        needs_solution_discussion: newValue
+      });
+      if (data.status === 'success') {
+        setTask(data.data);
+        showToast?.('success', newValue ? 'Đã đánh dấu cần trao đổi giải pháp' : 'Đã bỏ đánh dấu trao đổi giải pháp');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast?.('error', 'Không thể cập nhật. Vui lòng thử lại.');
+    } finally {
+      setUpdatingDiscussion(false);
     }
   };
 
@@ -158,6 +178,20 @@ const TaskDetailModal = ({ taskId, onClose, showToast }) => {
                   </div>
 
                   <div className="pt-2 space-y-2">
+                    {/* Toggle trao đổi giải pháp */}
+                    <button
+                      disabled={updatingDiscussion}
+                      onClick={toggleDiscussion}
+                      className={`flex items-center justify-center gap-2 w-full py-3 rounded-xl text-[10px] font-bold transition-all shadow-sm cursor-pointer border ${
+                        task.needs_solution_discussion
+                          ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
+                          : 'bg-slate-50 text-slate-500 border-slate-100 hover:bg-slate-100'
+                      }`}
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" />
+                      {updatingDiscussion ? 'Đang cập nhật...' : (task.needs_solution_discussion ? 'Cần trao đổi giải pháp' : 'Không cần trao đổi giải pháp')}
+                    </button>
+
                     <a 
                       href={`https://${task.jira_domain}/browse/${task.issue_key}`} target="_blank" rel="noreferrer"
                       className="flex items-center justify-center gap-2 w-full py-3 bg-blue-600 text-white rounded-xl text-[10px] font-bold hover:bg-blue-700 transition-all shadow-md cursor-pointer"
