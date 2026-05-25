@@ -86,6 +86,8 @@ class JiraIssueRepository {
         let order = [['start_date', 'DESC']];
         if (filters.order_by === 'assignee_name') {
             order = [['assignee_name', 'ASC'], ['start_date', 'DESC']];
+        } else if (filters.order_by === 'parent_first') {
+            order = [['parent_id', 'ASC'], ['assignee_name', 'ASC'], ['start_date', 'DESC']];
         }
 
         const { rows, count } = await JiraIssue.findAndCountAll({

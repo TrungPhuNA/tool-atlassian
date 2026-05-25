@@ -15,6 +15,7 @@ const ALL_COLUMNS = [
     { id: 'start_date', label: 'Ngày bắt đầu', default: false },
     { id: 'due_date', label: 'Hạn chót', default: true },
     { id: 'needs_solution_discussion', label: 'Solution', default: true },
+    { id: 'note', label: 'Note', default: true },
 ];
 
 const ExportGoogleSheetModal = ({ filters, onClose, showToast }) => {

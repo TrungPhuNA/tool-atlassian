@@ -12,7 +12,7 @@ class ExportController {
                 ...filters,
                 limit: 5000,
                 page: 1,
-                order_by: 'assignee_name'
+                order_by: 'parent_first'
             };
             const { rows } = await jiraIssueRepository.getAll(queryParams);
 

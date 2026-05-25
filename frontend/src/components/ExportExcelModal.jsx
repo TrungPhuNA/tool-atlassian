@@ -17,6 +17,7 @@ const ALL_COLUMNS = [
     { id: 'start_date', label: 'Ngày bắt đầu', default: false },
     { id: 'due_date', label: 'Hạn chót', default: true },
     { id: 'needs_solution_discussion', label: 'Solution', default: true },
+    { id: 'note', label: 'Note', default: true },
 ];
 
 /**
@@ -78,7 +79,7 @@ const ExportExcelModal = ({ filters, onClose, showToast }) => {
             worksheet.columns = activeCols.map(col => ({
                 header: col.label,
                 key: col.id,
-                width: col.id === 'summary' ? 50 : 20
+                width: col.id === 'summary' ? 50 : (col.id === 'needs_solution_discussion' ? 12 : (col.id === 'note' ? 30 : 20))
             }));
 
             const headerRow = worksheet.getRow(1);
