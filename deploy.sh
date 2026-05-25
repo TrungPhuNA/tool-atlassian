@@ -23,6 +23,11 @@ npm run build
 echo "🟢 Đang Restart Backend API..."
 cd $PROJECT_ROOT/api
 npm install
+
+# Chạy migration trước khi restart
+echo "🗄️ Đang chạy Database Migration..."
+npx sequelize-cli db:migrate --env production
+
 cd $PROJECT_ROOT
 pm2 startOrRestart ecosystem.config.js --env production
 
