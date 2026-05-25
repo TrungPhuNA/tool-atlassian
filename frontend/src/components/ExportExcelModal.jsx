@@ -108,6 +108,9 @@ const ExportExcelModal = ({ filters, onClose, showToast }) => {
                 const rowData = {};
                 activeCols.forEach(col => {
                     let val = task[col.id];
+                    if (col.id === 'issue_type' && task.parent_id) {
+                        val = '↳ ' + val;
+                    }
                     if (col.id.includes('date') && val) {
                         val = new Date(val).toLocaleDateString('vi-VN');
                     } else if (col.id === 'story_points') {

@@ -28,6 +28,9 @@ class ExportController {
             const dataRows = rows.map(task => {
                 return columns.map(col => {
                     let val = task[col.id];
+                    if (col.id === 'issue_type' && task.parent_id) {
+                        val = '↳ ' + val;
+                    }
                     if (col.id === 'issue_key') {
                         const jiraLink = `https://${task.jira_domain}/browse/${val}`;
                         return `=HYPERLINK("${jiraLink}", "${val}")`;
