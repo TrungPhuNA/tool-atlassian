@@ -57,7 +57,7 @@ const TaskRow = memo(React.forwardRef(({ task, onSelect }, ref) => {
                         {!hasDesc && <span className="px-1.5 py-0.5 bg-amber-50 text-amber-600 text-[9px] font-bold rounded border border-amber-100 leading-none">Thiếu mô tả</span>}
                         {!hasSP && <span className="px-1.5 py-0.5 bg-orange-50 text-orange-600 text-[9px] font-bold rounded border border-orange-100 leading-none">Chưa chấm SP</span>}
                         {!hasDue && <span className="px-1.5 py-0.5 bg-rose-50 text-rose-600 text-[9px] font-bold rounded border border-rose-100 leading-none">Thiếu hạn</span>}
-                        {needsDiscussion && <span className="px-1.5 py-0.5 bg-purple-50 text-purple-600 text-[9px] font-bold rounded border border-purple-100 leading-none flex items-center gap-0.5"><MessageCircle className="w-2.5 h-2.5" /> Trao đổi</span>}
+                        {needsDiscussion && <span className="px-1.5 py-0.5 bg-purple-50 text-purple-600 text-[9px] font-bold rounded border border-purple-100 leading-none flex items-center gap-0.5"><MessageCircle className="w-2.5 h-2.5" /> Solution</span>}
                         <span className="text-sm font-semibold text-slate-700 line-clamp-1 group-hover:text-blue-600 transition-colors">{task.summary}</span>
                     </div>
                     {task.sprint_name && (
@@ -127,7 +127,7 @@ const TaskCard = memo(React.forwardRef(({ task, onSelect }, ref) => {
                     {!hasDesc && <span className="px-1.5 py-0.5 bg-amber-50 text-amber-600 text-[9px] font-bold rounded border border-amber-100">Thiếu mô tả</span>}
                     {!hasSP && <span className="px-1.5 py-0.5 bg-orange-50 text-orange-600 text-[9px] font-bold rounded border border-orange-100">Chưa SP</span>}
                     {!hasDue && <span className="px-1.5 py-0.5 bg-rose-50 text-rose-600 text-[9px] font-bold rounded border border-rose-100">Thiếu hạn</span>}
-                    {needsDiscussion && <span className="px-1.5 py-0.5 bg-purple-50 text-purple-600 text-[9px] font-bold rounded border border-purple-100 flex items-center gap-0.5"><MessageCircle className="w-2.5 h-2.5" /> Trao đổi</span>}
+                    {needsDiscussion && <span className="px-1.5 py-0.5 bg-purple-50 text-purple-600 text-[9px] font-bold rounded border border-purple-100 flex items-center gap-0.5"><MessageCircle className="w-2.5 h-2.5" /> Solution</span>}
                 </div>
             </div>
 

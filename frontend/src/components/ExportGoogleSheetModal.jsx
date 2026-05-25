@@ -14,7 +14,7 @@ const ALL_COLUMNS = [
     { id: 'sprint_name', label: 'Sprint', default: true },
     { id: 'start_date', label: 'Ngày bắt đầu', default: false },
     { id: 'due_date', label: 'Hạn chót', default: true },
-    { id: 'needs_solution_discussion', label: 'Có cần trao đổi giải pháp hay không ?', default: true },
+    { id: 'needs_solution_discussion', label: 'Solution', default: true },
 ];
 
 const ExportGoogleSheetModal = ({ filters, onClose, showToast }) => {

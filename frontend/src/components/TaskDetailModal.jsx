@@ -32,10 +32,9 @@ const TaskDetailModal = ({ taskId, onClose, showToast }) => {
     }
   };
 
-  const toggleDiscussion = async () => {
+  const toggleDiscussion = async (newValue) => {
     setUpdatingDiscussion(true);
     try {
-      const newValue = !task.needs_solution_discussion;
       const { data } = await client.patch(`/tasks/${task.id}/solution-discussion`, {
         needs_solution_discussion: newValue
       });
@@ -178,19 +177,19 @@ const TaskDetailModal = ({ taskId, onClose, showToast }) => {
                   </div>
 
                   <div className="pt-2 space-y-2">
-                    {/* Toggle trao đổi giải pháp */}
-                    <button
-                      disabled={updatingDiscussion}
-                      onClick={toggleDiscussion}
-                      className={`flex items-center justify-center gap-2 w-full py-3 rounded-xl text-[10px] font-bold transition-all shadow-sm cursor-pointer border ${
-                        task.needs_solution_discussion
-                          ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
-                          : 'bg-slate-50 text-slate-500 border-slate-100 hover:bg-slate-100'
-                      }`}
-                    >
-                      <MessageCircle className="w-3.5 h-3.5" />
-                      {updatingDiscussion ? 'Đang cập nhật...' : (task.needs_solution_discussion ? 'Cần trao đổi giải pháp' : 'Không cần trao đổi giải pháp')}
-                    </button>
+                    {/* Select Solution */}
+                    <div className="flex items-center gap-3 px-1">
+                      <span className="text-[10px] font-bold text-slate-500">Solution</span>
+                      <select
+                        value={task.needs_solution_discussion ? 'yes' : 'no'}
+                        onChange={(e) => toggleDiscussion(e.target.value === 'yes')}
+                        disabled={updatingDiscussion}
+                        className="flex-1 p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-blue-400 cursor-pointer"
+                      >
+                        <option value="no">Không</option>
+                        <option value="yes">Có</option>
+                      </select>
+                    </div>
 
                     <a 
                       href={`https://${task.jira_domain}/browse/${task.issue_key}`} target="_blank" rel="noreferrer"
