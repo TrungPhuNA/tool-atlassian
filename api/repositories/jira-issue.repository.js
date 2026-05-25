@@ -88,8 +88,8 @@ class JiraIssueRepository {
             order = [['assignee_name', 'ASC'], ['start_date', 'DESC']];
         } else if (filters.order_by === 'parent_first') {
             order = [
-                [sequelize.literal('COALESCE(parent_id, id)'), 'ASC'],
-                [sequelize.literal('parent_id IS NOT NULL'), 'ASC'],
+                [sequelize.literal('COALESCE(`jira_issues`.`parent_id`, `jira_issues`.`id`)'), 'ASC'],
+                [sequelize.literal('`jira_issues`.`parent_id` IS NOT NULL'), 'ASC'],
                 ['assignee_name', 'ASC'],
                 ['start_date', 'DESC']
             ];
