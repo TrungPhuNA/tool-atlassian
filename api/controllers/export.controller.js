@@ -30,7 +30,10 @@ class ExportController {
                 'Thuan Nguyen Hung',
                 'Nguyen Thi Vui',
                 'Huong Bui Thi Thanh',
-                'Duong Hoang Thi Thuy'
+                'Duong Hoang Thi Thuy',
+                'Tudo',
+                'Hieu Ta Trung',
+                'Cuong Tran The'
             ];
             const excludedStatuses = [
                 'Done', 'Closed', 'Resolved', 'Deploy production',
