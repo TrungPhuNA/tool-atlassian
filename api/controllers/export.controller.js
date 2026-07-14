@@ -23,9 +23,47 @@ class ExportController {
                 });
             }
 
-            // 2. Chuẩn bị headers và rows cho Google Sheet
+            // 2. Lọc dữ liệu trước khi xuất
+            const excludedAssignees = [
+                'Linh Tran Thi',
+                'Tai Nguyen',
+                'Thuan Nguyen Hung',
+                'Nguyen Thi Vui',
+                'Huong Bui Thi Thanh',
+                'Duong Hoang Thi Thuy'
+            ];
+            const excludedStatuses = [
+                'Done', 'Closed', 'Resolved', 'Deploy production',
+                'DONE', 'Deploy Production'
+            ];
+
+            const filteredRows = rows.filter(task => {
+                const name = (task.assignee_name || '').trim();
+                const status = (task.status || '').trim();
+
+                // Loại bỏ nếu assignee nằm trong danh sách loại trừ
+                if (excludedAssignees.some(ex => name.toLowerCase() === ex.toLowerCase())) {
+                    return false;
+                }
+
+                // Loại bỏ nếu status nằm trong danh sách loại trừ (không phân biệt hoa thường)
+                if (excludedStatuses.some(s => status.toLowerCase() === s.toLowerCase())) {
+                    return false;
+                }
+
+                return true;
+            });
+
+            if (filteredRows.length === 0) {
+                return res.status(400).json({
+                    status: 'fail',
+                    message: 'Không có dữ liệu để xuất sau khi lọc'
+                });
+            }
+
+            // 3. Chuẩn bị headers và rows cho Google Sheet
             const headers = columns.map(col => col.label);
-            const dataRows = rows.map(task => {
+            const dataRows = filteredRows.map(task => {
                 return columns.map(col => {
                     let val = task[col.id];
                     if (col.id === 'issue_type' && task.parent_id) {
