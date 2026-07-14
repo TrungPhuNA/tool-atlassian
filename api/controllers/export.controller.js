@@ -35,23 +35,22 @@ class ExportController {
                 'Hieu Ta Trung',
                 'Cuong Tran The',
                 'Huy Nguyen'
-            ];
+            ].map(s => s.toLowerCase());
             const excludedStatuses = [
-                'Done', 'Closed', 'Resolved', 'Deploy production',
-                'DONE', 'Deploy Production'
+                'done', 'closed', 'resolved', 'deploy production'
             ];
 
             const filteredRows = rows.filter(task => {
-                const name = (task.assignee_name || '').trim();
-                const status = (task.status || '').trim();
+                const name = (task.assignee_name || '').trim().toLowerCase();
+                const status = (task.status || '').trim().toLowerCase();
 
                 // Loại bỏ nếu assignee nằm trong danh sách loại trừ
-                if (excludedAssignees.some(ex => name.toLowerCase() === ex.toLowerCase())) {
+                if (excludedAssignees.includes(name)) {
                     return false;
                 }
 
-                // Loại bỏ nếu status nằm trong danh sách loại trừ (không phân biệt hoa thường)
-                if (excludedStatuses.some(s => status.toLowerCase() === s.toLowerCase())) {
+                // Loại bỏ nếu status nằm trong danh sách loại trừ
+                if (excludedStatuses.includes(status)) {
                     return false;
                 }
 
